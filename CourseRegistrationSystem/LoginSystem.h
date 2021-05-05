@@ -1,3 +1,6 @@
 #pragma once
 
-void loginScreen();
+#include "Globals.h"
+
+void viewProfile(User*);
+void login();

@@ -1,33 +1,35 @@
 #include "LoginSystem.h"
-#include <string>
-#include <fstream>
-#include <iomanip>
-#include <iostream>
 
 using namespace std;
 
 const string userData = "data/users.csv";
-
-struct User {
-	int id;
-	string password;
-	bool isAdmin;
-	User* prev;
-	User* next;
-};
-struct List {
-	User* pHead;
-	User* pTail;
-	int size;
+string id, password;
+User* currentUser = NULL;
 
 
-};
+void drawTable() {
+	
+	gotoXY(0, consoleRect->right);
+	for (int i = consoleRect->left; i < consoleRect->right; i++) {
+		cout << char(205);
+	}
+}
+void loginUI() {
+	getConsoleSize();
+	drawTable();
+}
 
 User* createUser(string data) {
 	User* usersData = new User;
-	usersData->id = stoi(data.substr(0, data.find(',')));
+	usersData->id = data.substr(0, data.find(','));
 	data.erase(0, data.find(',') + 1);
 	usersData->password = data.substr(0, data.find(','));
+	data.erase(0, data.find(',') + 1);
+	usersData->fullName = data.substr(0, data.find(','));
+	data.erase(0, data.find(',') + 1);
+	usersData->className = data.substr(0, data.find(','));
+	data.erase(0, data.find(',') + 1);
+	usersData->gender = data.substr(0, data.find(','));
 	data.erase(0, data.find(',') + 1);
 	if (data.substr(0, data.find('\n')) == "TRUE") usersData->isAdmin = true;
 	else usersData->isAdmin = false;
@@ -64,20 +66,103 @@ void readUsersData(List& listUsers) {
 		}
 	}
 }
-void printUsersData(List listUsers) {
-	User* temp = listUsers.pHead;
-	while (temp != NULL) {
-		cout << "Username: " << temp->id << endl;
-		cout << "Password: " << temp->password << endl;
-		cout << "Is admin: " << temp->isAdmin << endl;
-		temp = temp->next;
+
+void checkUser(string id, string password, List list, User* &currUser) {
+	User* data = list.pHead;
+	while (data != NULL) {
+		if (id == data->id) {
+			if (password == data->password) currUser = data;
+			else break;
+		}
+		data = data->next;
 	}
 }
+void getPassword(bool isHidden) {
+	password = "";
+	while (true) {
+		char ch;
+		ch = _getch();
+		if (ch == 13) {
+			cout << endl;
+			return;
+		}
+		else if (ch == 0) {
+			ch = _getch();
+			if (ch == 59) {
+				if (isHidden) {
+					string temp = password;
+					while (temp.length() > 0) {
+						cout << "\b \b";
+						temp.pop_back();
+					}
+					cout << password;
+				}
+				else {
+					string temp = password;
+					while (temp.length() > 0) {
+						cout << "\b \b";
+						temp.pop_back();
+					}
+					for (int i = 0; i < password.length(); i++) {
+						cout << '*';
+					}
+				}
+				isHidden = !isHidden;
+			}
+		}
+		else if (ch == 8) {
+			if (password.length() > 0) {
+				cout << "\b \b";
+				password.pop_back();
+			}
+		}
+		else if (password.length() == 10) {
 
-void loginScreen() {
-	int quantity;
+		}
+		else {
+			password += ch;
+			if (isHidden) {
+				cout << "*";
+			}
+			else cout << ch;
+		}
+		
+	}
+}
+void loginScreen(List list, User* &currUser) {
+	cout << "Id: ";
+	cin >> id;
+	cout << "Password: ";
+	cin.ignore();
+	getPassword(true);
+	cout << password;
+	checkUser(id, password, list, currUser);
+	if (currUser == NULL) cout << "Try again" << endl;
+	else cout << "Successful" << endl;
+}
+
+void viewProfile(User* currUser) {
+	cout << "Student ID: " << currUser->id << endl;
+	cout << "Password: " << currUser->password << endl;
+	cout << "Full name: " << currUser->fullName<< endl;
+	cout << "Class: " << currUser->className << endl;
+	cout << "Gender: " << currUser->gender << endl;
+	if (currUser->isAdmin) cout << "Academic staff member" << endl;
+	else cout << "Student" << endl;
+}
+
+
+
+void login() {
+	/*string s;
 	List listUsers;
+	hideCursor();
 	readUsersData(listUsers);
-	printUsersData(listUsers);
-
+	hideCursor();
+	loginScreen(listUsers, currentUser);
+	viewProfile(currentUser);*/
+	hideCursor();
+	while (true) {
+		loginUI();
+	}
 }
