@@ -3,4 +3,4 @@
 #include "Globals.h"
 
 void viewProfile(User*);
-void login();
+void loginSystem();

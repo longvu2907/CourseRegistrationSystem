@@ -7,18 +7,6 @@ string id, password;
 User* currentUser = NULL;
 
 
-void drawTable() {
-	
-	gotoXY(0, consoleRect->right);
-	for (int i = consoleRect->left; i < consoleRect->right; i++) {
-		cout << char(205);
-	}
-}
-void loginUI() {
-	getConsoleSize();
-	drawTable();
-}
-
 User* createUser(string data) {
 	User* usersData = new User;
 	usersData->id = data.substr(0, data.find(','));
@@ -67,43 +55,49 @@ void readUsersData(List& listUsers) {
 	}
 }
 
-void checkUser(string id, string password, List list, User* &currUser) {
+User* login(string id, string password, List list) {
 	User* data = list.pHead;
 	while (data != NULL) {
 		if (id == data->id) {
-			if (password == data->password) currUser = data;
-			else break;
+			if (password == data->password) return data;
+			else return NULL;
 		}
 		data = data->next;
 	}
+	return NULL;
 }
-void getPassword(bool isHidden) {
-	password = "";
+
+string getPassword(bool isHidden) {
+	string passwrd = "";
 	while (true) {
+		gotoXY(70, 13);
+		if (isHidden) cout << char(254);
+		else cout << " ";
+		gotoXY(58 + passwrd.length(), 13);
 		char ch;
 		ch = _getch();
 		if (ch == 13) {
 			cout << endl;
-			return;
+			return passwrd;
 		}
 		else if (ch == 0) {
 			ch = _getch();
 			if (ch == 59) {
 				if (isHidden) {
-					string temp = password;
+					string temp = passwrd;
 					while (temp.length() > 0) {
 						cout << "\b \b";
 						temp.pop_back();
 					}
-					cout << password;
+					cout << passwrd;
 				}
 				else {
-					string temp = password;
+					string temp = passwrd;
 					while (temp.length() > 0) {
 						cout << "\b \b";
 						temp.pop_back();
 					}
-					for (int i = 0; i < password.length(); i++) {
+					for (int i = 0; i < passwrd.length(); i++) {
 						cout << '*';
 					}
 				}
@@ -111,16 +105,16 @@ void getPassword(bool isHidden) {
 			}
 		}
 		else if (ch == 8) {
-			if (password.length() > 0) {
+			if (passwrd.length() > 0) {
 				cout << "\b \b";
-				password.pop_back();
+				passwrd.pop_back();
 			}
 		}
-		else if (password.length() == 10) {
+		else if (passwrd.length() == 10) {
 
 		}
 		else {
-			password += ch;
+			passwrd += ch;
 			if (isHidden) {
 				cout << "*";
 			}
@@ -128,17 +122,6 @@ void getPassword(bool isHidden) {
 		}
 		
 	}
-}
-void loginScreen(List list, User* &currUser) {
-	cout << "Id: ";
-	cin >> id;
-	cout << "Password: ";
-	cin.ignore();
-	getPassword(true);
-	cout << password;
-	checkUser(id, password, list, currUser);
-	if (currUser == NULL) cout << "Try again" << endl;
-	else cout << "Successful" << endl;
 }
 
 void viewProfile(User* currUser) {
@@ -151,18 +134,51 @@ void viewProfile(User* currUser) {
 	else cout << "Student" << endl;
 }
 
+void loginUI(List listUser) {
+	const int width = 40;
+	const int height = 10;
+	const int left = 40;
+	const int top = 8;
+	drawTable(width, height, left, top);
 
+	gotoXY(58, 6);
+	cout << "LOGIN";
+	gotoXY(48, 11);
+	cout << "ID:";
+	gotoXY(48, 13);
+	cout << "PASSWORD:";
+	gotoXY(70, 13);
+	cout << char(254);
+	cout << " Hidden";
+	gotoXY(55, 11);
+	getline(cin, id);
+	password = getPassword(true);
+	currentUser = login(id, password, listUser);
+	
+}
 
-void login() {
-	/*string s;
-	List listUsers;
-	hideCursor();
-	readUsersData(listUsers);
-	hideCursor();
-	loginScreen(listUsers, currentUser);
-	viewProfile(currentUser);*/
-	hideCursor();
+void loginSystem() {
+	List listUser;
+	readUsersData(listUser);
 	while (true) {
-		loginUI();
+		hideCursor(false);
+		loginUI(listUser);
+		if (currentUser == NULL) {
+			gotoXY(55, 15);
+			cout << "Wrong !!!!!";
+			gotoXY(50, 16);
+			cout << "Enter to try again...";
+			_getch();
+			system("cls");
+		}
+		else {
+			gotoXY(55, 15);
+			cout << "Succesfull";
+			gotoXY(50, 16);
+			cout << "Enter to continue...";
+			_getch();
+			system("cls");
+			break;
+		}
 	}
 }

@@ -7,6 +7,7 @@
 #include <conio.h>
 #include <windows.h>
 
+
 using namespace std;
 
 struct User {
@@ -28,8 +29,7 @@ struct List {
 };
 
 void gotoXY(int x, int y);
-void getConsoleSize();
-void hideCursor();
+void hideCursor(bool);
+void drawTable(int width, int height, int left, int top);
 
 extern User* currentUser;
-extern RECT* consoleRect;

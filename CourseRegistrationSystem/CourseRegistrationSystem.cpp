@@ -8,7 +8,7 @@
 using namespace std;
 
 void main() {
-	login();
+	loginSystem();
 	cout << currentUser->fullName;
 	//while (true) {
 	//	system("cls");
