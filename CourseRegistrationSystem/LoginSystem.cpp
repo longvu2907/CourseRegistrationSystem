@@ -173,7 +173,7 @@ void loginSystem() {
 		}
 		else {
 			gotoXY(55, 15);
-			cout << "Succesfull";
+			cout << "Successful";
 			gotoXY(50, 16);
 			cout << "Enter to continue...";
 			_getch();

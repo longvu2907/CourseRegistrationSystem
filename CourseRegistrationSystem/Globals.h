@@ -7,6 +7,8 @@
 #include <conio.h>
 #include <windows.h>
 
+#include "AcademicStaff.h"
+#include "Student.h"
 
 using namespace std;
 
