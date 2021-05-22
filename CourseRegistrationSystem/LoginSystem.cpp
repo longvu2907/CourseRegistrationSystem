@@ -2,10 +2,10 @@
 
 using namespace std;
 
-const string userData = "data/users.csv";
+const string userDataPath = "data/users.csv";
 string id, password;
 User* currentUser = NULL;
-
+List listUser;
 
 User* createUser(string data) {
 	User* usersData = new User;
@@ -41,9 +41,8 @@ void initList(List& list) {
 	list.size = 0;
 }
 void readUsersData(List& listUsers) {
-	ifstream fin(userData);
+	ifstream fin(userDataPath);
 	string  data = "";
-	//Allocate for usersData
 	getline(fin, data);
 	initList(listUsers);
 	while (!fin.eof()) {
@@ -158,7 +157,7 @@ void loginUI(List listUser) {
 }
 
 void loginSystem() {
-	List listUser;
+	system("cls");
 	readUsersData(listUser);
 	while (true) {
 		hideCursor(false);

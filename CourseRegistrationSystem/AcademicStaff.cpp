@@ -1,77 +1,89 @@
 #include "AcademicStaff.h"
 
+const char cursor = char(174);
+const int timeBeginSchoolYear = 9;
 
-int command(int&, int, int);
-void viewProfile();
+int command(int&, int, int, function<int(int)>);
+int staffOption(int);
+int userAccountOption(int);
+int subOption1(int);
+int subOption2(int);
+
+void userAccount();
+void changePassword();
 void logout();
+void Profile();
 
 void staffMenu() {
 	const int width = 40;
-	const int height = 4;
+	const int height = 10;
 	const int left = 40;
 	const int top = 8;
-	const char cursor = char(174);
-	int curPos = 0;
 
-	hideCursor(true);
+	int curPos = 0;
+	int yPos = 9;
+	do {
+		hideCursor(true);
+		system("cls");
+		drawTable(width, height, left, top);
+		gotoXY(55, 6); cout << "HCMUS Portal";
+		gotoXY(45, 7); cout << "Welcome " << currentUser->fullName;
+		gotoXY(48, yPos); cout << "User account" ;
+		yPos++;
+		gotoXY(48, yPos); cout << "Profile";
+		yPos++;
+		yPos = 9;
+		gotoXY(70, curPos + yPos); cout << cursor;
+	} while (command(curPos, 0, 2, staffOption));
+}
+
+void userAccount() {
+	const int width = 40;
+	const int height = 10;
+	const int left = 40;
+	const int top = 8;
+
+	int curPos = 0;
+	int yPos = 9;
 	do {
 		system("cls");
 		drawTable(width, height, left, top);
-		gotoXY(48, 9); cout << "View profile";
-		gotoXY(48, 10); cout << "Log out";
-		gotoXY(70, curPos + 9); cout << cursor;
-	} while (command(curPos, 0, 2));
+		gotoXY(55, 6); cout << "User Account";
+		gotoXY(48, yPos); cout << "Change Password";
+		yPos++;
+		gotoXY(48, yPos); cout << "Logout";
+		yPos++;
+		gotoXY(48, yPos); cout << "Back";
+		yPos++;
+		yPos = 9;
+		gotoXY(70, curPos + yPos); cout << cursor;
+	} while (command(curPos, 0, 2, userAccountOption));
 }
 
-int command(int& curPos, int minPos, int maxPos) {
-	int key = _getch();
-	switch (key) {
-	case 13:
-		switch (curPos) {
-		case 0:
-			viewProfile();
-			break;
-		case 1:
-			logout();
-			return 0;
-			break;
-		case 2:
-			break;
-		case 3:
-			break;
-		}
+int staffOption(int curPos) {
+	switch (curPos) {
+	case 0:
+		userAccount();
 		break;
-	case 224:
-		key = _getch();
-		switch (key) {
-		case 72:
-			if (curPos > minPos) curPos--;
-			break;
-		case 80:
-			if (curPos < maxPos) curPos++;
-			break;
-		}
+	case 1:
+		Profile();
+		break;
 	}
 	return 1;
 }
-
-void viewProfile() {
-	const int width = 40;
-	const int height = 4;
-	const int left = 40;
-	const int top = 8;
-	const char cursor = char(174);
-	int curPos = 0;
-
-	do {
-		system("cls");
-		drawTable(width, height, left, top);
-		gotoXY(48, 9); cout << "View profile";
-		gotoXY(48, 10); cout << "Log out";
-		gotoXY(70, curPos + 9); cout << cursor;
-	} while (command(curPos,0,0));
-}
-
-void logout() {
-	currentUser = NULL;
+int userAccountOption(int curPos) {
+	switch (curPos) {
+	case 0:
+		changePassword();
+		break;
+	case 1:
+		logout();
+		loginSystem();
+		return 0;
+		break;
+	case 2:
+		return 0;
+		break;
+	}
+	return 1;
 }

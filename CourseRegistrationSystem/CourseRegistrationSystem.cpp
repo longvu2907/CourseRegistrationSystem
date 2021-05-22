@@ -1,14 +1,8 @@
-#include <iostream>
-#include <fstream>
-#include <string>
-
-#include "Globals.h"
-#include "LoginSystem.h"
-
-using namespace std;
+﻿#include "Globals.h"
 
 void main() {
 	while (true) {
+		getCurrentDate();
 		loginSystem();
 		if (currentUser->isAdmin) {
 			staffMenu();
