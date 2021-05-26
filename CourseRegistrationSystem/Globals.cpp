@@ -1,20 +1,41 @@
 #include "Globals.h"
 
-const string userDataPath = "data/users.csv";
+const string userDataPath = "data/Accounts/users.csv";
 Date currentDate;
+string currentSchoolYear;
 
+Date strToDate(string str) {
+	Date date;
+	date.day = stoi(str.substr(0, str.find('/')));
+	str.erase(0, str.find('/') + 1);
+	date.month = stoi(str.substr(0, str.find('/')));
+	str.erase(0, str.find('/') + 1);
+	date.year = stoi(str.substr(0, str.find('/')));
+	str.erase(0, str.find('/') + 1);
+	return date;
+}
 void gotoXY(int x, int y) {
 	COORD coord;
 	coord.X = x;
 	coord.Y = y;
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
 }
-
 void hideCursor(bool isHiden) {
 	CONSOLE_CURSOR_INFO cursor;
 	GetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursor);
 	cursor.bVisible = !isHiden;
 	SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursor);
+}
+bool dirExists(const std::string& dirName_in)
+{
+	DWORD ftyp = GetFileAttributesA(dirName_in.c_str());
+	if (ftyp == INVALID_FILE_ATTRIBUTES)
+		return false;  //something is wrong with your path!
+
+	if (ftyp & FILE_ATTRIBUTE_DIRECTORY)
+		return true;   // this is a directory!
+
+	return false;    // this is not a directory!
 }
 
 void drawTable(int width, int height, int left, int top) {
@@ -40,14 +61,25 @@ void drawTable(int width, int height, int left, int top) {
 	}
 }
 
+void addUser(List& list, User* user) {
+	if (list.pHead == NULL) {
+		list.pHead = list.pTail = user;
+	}
+	else {
+		list.pTail->next = user;
+		user->prev = list.pTail;
+		list.pTail = user;
+	}
+}
 void saveListUser() {
 	ofstream fout(userDataPath);
-	fout << "id,password,fullName,class,gender,isAdmin" << endl;
+	fout << "ID,Password,Last name,First name,Class,Gender,Date of Birth,Staff" << endl;
 	User* curr = listUser.pHead;
 	while (curr != NULL) {
-		fout << curr->id << "," << curr->password << "," << curr->fullName << ","
-			<< curr->className << "," << curr->gender << ",";
-		if (curr->isAdmin) fout << "TRUE" << endl;
+		string dateOfBirth = to_string(curr->dateOfBirth.day) + "/" + to_string(curr->dateOfBirth.month) + "/" + to_string(curr->dateOfBirth.year);
+		fout << curr->id << "," << curr->password << "," << curr->lastName << "," << curr->firstName
+			<< "," << curr->className << "," << curr->gender << "," << dateOfBirth << ",";
+		if (curr->isStaff) fout << "TRUE" << endl;
 		else fout << "FALSE" << endl;
 		curr = curr->next;
 	}
@@ -98,4 +130,14 @@ void getCurrentDate() {
 	currentDate.month = 1 + ltm.tm_mon;
 	currentDate.day = ltm.tm_mday;
 	currentDate.wDay = wDay;
+}
+void getCurrentSchoolYear() {
+	const int beginSchoolYearMonth = 9;
+
+	if (currentDate.month < beginSchoolYearMonth) {
+		currentSchoolYear = to_string(currentDate.year - 1) + "-" + to_string(currentDate.year);
+	}
+	else {
+		currentSchoolYear = to_string(currentDate.year) + "-" + to_string(currentDate.year + 1);
+	}
 }

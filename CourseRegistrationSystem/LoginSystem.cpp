@@ -2,38 +2,30 @@
 
 using namespace std;
 
-const string userDataPath = "data/users.csv";
+const string userDataPath = "data/Accounts/users.csv";
 string id, password;
 User* currentUser = NULL;
 List listUser;
+int yPos = 13;
 
-User* createUser(string data) {
+User* convertData(ifstream& data) {
 	User* usersData = new User;
-	usersData->id = data.substr(0, data.find(','));
-	data.erase(0, data.find(',') + 1);
-	usersData->password = data.substr(0, data.find(','));
-	data.erase(0, data.find(',') + 1);
-	usersData->fullName = data.substr(0, data.find(','));
-	data.erase(0, data.find(',') + 1);
-	usersData->className = data.substr(0, data.find(','));
-	data.erase(0, data.find(',') + 1);
-	usersData->gender = data.substr(0, data.find(','));
-	data.erase(0, data.find(',') + 1);
-	if (data.substr(0, data.find('\n')) == "TRUE") usersData->isAdmin = true;
-	else usersData->isAdmin = false;
+	Date dateOfBirth;
+	string temp;
+	getline(data,usersData->id,',');
+	getline(data, usersData->password, ',');
+	getline(data, usersData->lastName, ',');
+	getline(data, usersData->firstName, ',');
+	getline(data, usersData->className, ',');
+	getline(data, usersData->gender, ',');
+	getline(data, temp, ',');
+	usersData->dateOfBirth = strToDate(temp);
+	getline(data, temp, '\n');
+	if (temp == "TRUE") usersData->isStaff = true;
+	else usersData->isStaff = false;
 	usersData->next = NULL;
 	usersData->prev = NULL;
 	return usersData;
-}
-void addUser(List& list, User* user) {
-	if (list.pHead == NULL) {
-		list.pHead = list.pTail = user;
-	}
-	else {
-		list.pTail->next = user;
-		user->prev = list.pTail;
-		list.pTail = user;
-	}
 }
 void initList(List& list) {
 	list.pHead = NULL;
@@ -46,11 +38,8 @@ void readUsersData(List& listUsers) {
 	getline(fin, data);
 	initList(listUsers);
 	while (!fin.eof()) {
-		getline(fin, data);
-		if (data != "") {
-			addUser(listUsers, createUser(data));
-			listUsers.size++;
-		}
+		addUser(listUsers, convertData(fin));
+		listUsers.size++;
 	}
 }
 
@@ -65,14 +54,13 @@ User* login(string id, string password, List list) {
 	}
 	return NULL;
 }
-
 string getPassword(bool isHidden) {
 	string passwrd = "";
 	while (true) {
-		gotoXY(70, 13);
+		gotoXY(70, yPos + 2);
 		if (isHidden) cout << char(254);
 		else cout << " ";
-		gotoXY(58 + passwrd.length(), 13);
+		gotoXY(58 + passwrd.length(), yPos + 2);
 		char ch;
 		ch = _getch();
 		if (ch == 13) {
@@ -123,33 +111,25 @@ string getPassword(bool isHidden) {
 	}
 }
 
-void viewProfile(User* currUser) {
-	cout << "Student ID: " << currUser->id << endl;
-	cout << "Password: " << currUser->password << endl;
-	cout << "Full name: " << currUser->fullName<< endl;
-	cout << "Class: " << currUser->className << endl;
-	cout << "Gender: " << currUser->gender << endl;
-	if (currUser->isAdmin) cout << "Academic staff member" << endl;
-	else cout << "Student" << endl;
-}
-
 void loginUI(List listUser) {
 	const int width = 40;
 	const int height = 10;
 	const int left = 40;
-	const int top = 8;
-	drawTable(width, height, left, top);
+	const int top = 10;
 
-	gotoXY(58, 6);
-	cout << "LOGIN";
-	gotoXY(48, 11);
+	drawTable(width, height, left, top);
+	gotoXY(52, 6);
+	cout << "HCMUS PORTAL - LOGIN";
+	gotoXY(40, 8); cout << currentDate.wDay;
+	gotoXY(40, 9); cout << currentDate.day << '/' << currentDate.month << '/' << currentDate.year;
+	gotoXY(48, yPos);
 	cout << "ID:";
-	gotoXY(48, 13);
+	gotoXY(48, yPos + 2);
 	cout << "PASSWORD:";
-	gotoXY(70, 13);
+	gotoXY(70, yPos + 2);
 	cout << char(254);
 	cout << " Hidden";
-	gotoXY(55, 11);
+	gotoXY(55, yPos);
 	getline(cin, id);
 	password = getPassword(true);
 	currentUser = login(id, password, listUser);
@@ -163,17 +143,17 @@ void loginSystem() {
 		hideCursor(false);
 		loginUI(listUser);
 		if (currentUser == NULL) {
-			gotoXY(55, 15);
+			gotoXY(55, yPos + 5);
 			cout << "Wrong !!!!!";
-			gotoXY(50, 16);
+			gotoXY(50, yPos + 6);
 			cout << "Enter to try again...";
 			_getch();
 			system("cls");
 		}
 		else {
-			gotoXY(55, 15);
+			gotoXY(55, yPos + 5);
 			cout << "Successful";
-			gotoXY(50, 16);
+			gotoXY(50, yPos + 6);
 			cout << "Enter to continue...";
 			_getch();
 			system("cls");

@@ -3,8 +3,9 @@
 void main() {
 	while (true) {
 		getCurrentDate();
+		getCurrentSchoolYear();
 		loginSystem();
-		if (currentUser->isAdmin) {
+		if (currentUser->isStaff) {
 			staffMenu();
 		}
 		else {
@@ -12,4 +13,5 @@ void main() {
 		}
 		system("cls");
 	}
+
 }
