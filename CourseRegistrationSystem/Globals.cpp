@@ -1,6 +1,6 @@
 #include "Globals.h"
 
-const string userDataPath = "data/Accounts/users.csv";
+const string userDataPath = "Data/Accounts/users.csv";
 Date currentDate;
 string currentSchoolYear;
 
@@ -37,6 +37,81 @@ bool dirExists(const std::string& dirName_in)
 
 	return false;    // this is not a directory!
 }
+int removeDir(string dirPath)
+{
+	struct _finddata_t fb;   //find the storage structure of the same properties file.
+	string path;
+	long    handle;
+	int  resultone;
+	int   noFile;            // the tag for the system's hidden files
+
+	noFile = 0;
+	handle = 0;
+
+	path = dirPath + "/*";
+
+	handle = _findfirst(path.c_str(), &fb);
+
+	//find the first matching file
+	if (handle != -1)
+	{
+		//find next matching file
+		while (0 == _findnext(handle, &fb))
+		{
+			// "." and ".." are not processed
+			noFile = strcmp(fb.name, "..");
+
+			if (0 != noFile)
+			{
+				path.clear();
+				path = dirPath + "/" + fb.name;
+
+				//fb.attrib == 48 means folder
+				if (fb.attrib == 48)
+				{
+					removeDir(path);
+				}
+				else
+				{
+					//not folder, delete it. if empty folder, using _rmdir istead.
+					remove(path.c_str());
+				}
+			}
+		}
+		// close the folder and delete it only if it is closed. For standard c, using closedir instead(findclose -> closedir).
+		// when Handle is created, it should be closed at last.  
+		_findclose(handle);
+	}
+	_rmdir(dirPath.c_str());
+	return 0;
+}
+string* ls(string folder)
+{
+	string* names = new string[15];
+	string s = folder + "/*.*";
+	wstring search_path = wstring(s.begin(), s.end());
+	WIN32_FIND_DATA fd;
+	HANDLE hFind = ::FindFirstFile(search_path.c_str(), &fd);
+	int i = 0;
+	if (hFind != INVALID_HANDLE_VALUE) {
+		do {
+			// read all (real) files in current folder
+			// , delete '!' read other 2 default folder . and ..
+			if (!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+				wstring ws(fd.cFileName);
+				string str(ws.begin(), ws.end());
+				names[i] = str;
+				i++;
+			}
+		} while (::FindNextFile(hFind, &fd));
+		::FindClose(hFind);
+	}
+	return names;
+}
+void clearLine(int y) {
+	gotoXY(0, y);
+	printf("%c[2K", 27);
+}
 
 void drawTable(int width, int height, int left, int top) {
 	gotoXY(left, top);
@@ -60,8 +135,15 @@ void drawTable(int width, int height, int left, int top) {
 		cout << char(186);
 	}
 }
+void loading(int x, int y) {
+	for (int i = 0; i < 20; i++) {
+		gotoXY(i + x, y); cout << char(219);
+		Sleep(100);
+	}
+}
 
 void addUser(List& list, User* user) {
+	if (user == NULL) return;
 	if (list.pHead == NULL) {
 		list.pHead = list.pTail = user;
 	}

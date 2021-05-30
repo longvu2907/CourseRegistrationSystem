@@ -2,7 +2,6 @@
 
 const char cursor = char(174);
 string schoolYearPath;
-List listUsers;
 
 int command(int&, int, int, function<int(int)>);
 int staffOption(int);
@@ -154,6 +153,7 @@ User* convertData(ifstream& data, string className) {
 	User* newUser = new User;
 	string s, dateOfBirth;
 	getline(data, s, ',');
+	if (s == "") return NULL;
 	getline(data, newUser->id, ',');
 	getline(data, newUser->lastName, ',');
 	getline(data, newUser->firstName, ',');
@@ -163,16 +163,25 @@ User* convertData(ifstream& data, string className) {
 	getline(data, newUser->password, '\n');
 	newUser->isStaff = false;
 	newUser->className = className;
+	newUser->next = NULL;
+	newUser->prev = NULL;
 	return newUser;
 }
-void addStudentAccount(string className) {
-	string dataPath = "./Data/File Imported/";
-	ifstream fin(".");
-	string s = "";
-	getline(fin, s);
-	while (!fin.eof()) {
-		addUser(listUsers, convertData(fin,""));
-		listUsers.size++;
+void addStudentAccount(string program) {
+	string dataPath = "./Data/Students/1st-year/" + program;
+	string* classes = ls(dataPath);
+	int i = 0;
+	while (classes[i] != "") {
+		string className = classes[i].substr(0, classes[i].find('.'));
+		string path = dataPath + "/" + classes[i];
+		ifstream fin(path);
+		string s = "";
+		getline(fin, s);
+		while (!fin.eof()) {
+			addUser(listUser, convertData(fin,className));
+			listUser.size++;
+		}
+		i++;
 	}
 }
 void manageStudent() {
@@ -199,7 +208,17 @@ void manageStudent() {
 	} while (command(curPos, 0, 2, manageStudentOption));
 }
 void createClasses() {
-
+	char importedFiles[] = "./Data/Files Imported";
+	char firstYear[] = "./Data/Students/1st-year";
+	char secondYear[] = "./Data/Students/2nd-year";
+	char thirdYear[] = "./Data/Students/3rd-year";
+	char fourthYear[] = "./Data/Students/4th-year";
+	removeDir(fourthYear); //Remove students graduated
+	rename(thirdYear, fourthYear);//third-year Student up to fourth-year
+	rename(secondYear, thirdYear);//second-year Student up to third-year
+	rename(firstYear, secondYear);//first-year Student up to second-year
+	_mkdir(firstYear);//Create first-year Students folder
+	
 }
 void createSchoolYear() {
 	if (dirExists(schoolYearPath)) {
@@ -208,7 +227,9 @@ void createSchoolYear() {
 	else {
 		cout << "New school year has been created";
 		createClasses();
-		_mkdir(schoolYearPath.c_str());
+		/*_mkdir(schoolYearPath.c_str());
+		addStudentAccount("VP");
+		saveListUser();*/
 	}
 	_getch();
 }

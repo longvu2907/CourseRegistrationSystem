@@ -13,6 +13,7 @@ User* convertData(ifstream& data) {
 	Date dateOfBirth;
 	string temp;
 	getline(data,usersData->id,',');
+	if (usersData->id == "") return NULL;
 	getline(data, usersData->password, ',');
 	getline(data, usersData->lastName, ',');
 	getline(data, usersData->firstName, ',');
@@ -129,6 +130,8 @@ void loginUI(List listUser) {
 	gotoXY(70, yPos + 2);
 	cout << char(254);
 	cout << " Hidden";
+	gotoXY(48, yPos + 3);
+	cout << "(press F1 to show password)";
 	gotoXY(55, yPos);
 	getline(cin, id);
 	password = getPassword(true);

@@ -9,6 +9,7 @@
 #include <functional>
 #include <time.h>
 #include <direct.h>
+#include<io.h>
 
 #include "AcademicStaff.h"
 #include "Student.h"
@@ -42,9 +43,15 @@ struct List {
 
 Date strToDate(string);
 void gotoXY(int x, int y);
+void clearLine(int y);
 void hideCursor(bool);
 bool dirExists(const std::string& dirName_in);
+string* ls(string folder);
+int removeDir(string dirPath);
+
 void drawTable(int width, int height, int left, int top);
+void loading(int x, int y);
+
 void addUser(List& list, User* user);
 void saveListUser();
 void getCurrentDate();
