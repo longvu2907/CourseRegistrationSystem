@@ -29,7 +29,7 @@ void staffMenu() {
 	do {
 		hideCursor(true);
 		system("cls");
-		drawTable(width, height, left, top);
+		drawBox(width, height, left, top);
 		gotoXY(55, yPos - 4); cout << "HCMUS Portal";
 		gotoXY(40, yPos - 3); cout << currentDate.wDay;
 		gotoXY(40, yPos - 2); cout << currentDate.day << '/' << currentDate.month << '/' << currentDate.year;
@@ -56,7 +56,7 @@ void userAccount() {
 	int yPos = 9;
 	do {
 		system("cls");
-		drawTable(width, height, left, top);
+		drawBox(width, height, left, top);
 		gotoXY(55, yPos - 4); cout << "HCMUS Portal";
 		gotoXY(55, yPos - 2); cout << "User Account";
 		gotoXY(48, yPos); cout << "Change Password";
@@ -80,7 +80,7 @@ void changePassword() {
 	hideCursor(false);
 	do {
 		system("cls");
-		drawTable(width, height, left, top);
+		drawBox(width, height, left, top);
 		gotoXY(48, 9); cout << "Your old password: ";
 		getline(cin, currentPassword);
 		if (currentPassword == currentUser->password) {
@@ -123,7 +123,7 @@ void Profile() {
 		system("cls");
 		gotoXY(55, yPos - 4); cout << "HCMUS Portal";
 		gotoXY(57, yPos - 2); cout << "Profile";
-		drawTable(width, height, left, top);
+		drawBox(width, height, left, top);
 		gotoXY(48, yPos); cout << "Last name: " << currentUser->lastName;
 		yPos++;
 		gotoXY(48, yPos); cout << "First name: " << currentUser->firstName;
@@ -167,6 +167,14 @@ User* convertData(ifstream& data, string className) {
 	newUser->prev = NULL;
 	return newUser;
 }
+void importData(ifstream& fin, string className) {
+	string s = "";
+	getline(fin, s);
+	while (!fin.eof()) {
+		addUser(listUser, convertData(fin, className));
+		listUser.size++;
+	}
+}
 void addStudentAccount(string program) {
 	string dataPath = "./Data/Students/1st-year/" + program;
 	string* classes = ls(dataPath);
@@ -175,12 +183,7 @@ void addStudentAccount(string program) {
 		string className = classes[i].substr(0, classes[i].find('.'));
 		string path = dataPath + "/" + classes[i];
 		ifstream fin(path);
-		string s = "";
-		getline(fin, s);
-		while (!fin.eof()) {
-			addUser(listUser, convertData(fin,className));
-			listUser.size++;
-		}
+		
 		i++;
 	}
 }
@@ -194,7 +197,7 @@ void manageStudent() {
 
 	do {
 		system("cls");
-		drawTable(width, height, left, top);
+		drawBox(width, height, left, top);
 		gotoXY(55, yPos - 4); cout << "HCMUS Portal";
 		gotoXY(55, yPos - 2); cout << "Manage Student";
 		gotoXY(48, yPos); cout << "Create school year";
@@ -230,6 +233,7 @@ void createSchoolYear() {
 		/*_mkdir(schoolYearPath.c_str());
 		addStudentAccount("VP");
 		saveListUser();*/
+		
 	}
 	_getch();
 }

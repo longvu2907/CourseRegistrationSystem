@@ -22,7 +22,7 @@ void studentMenu() {
 	hideCursor(true);
 	do {
 		system("cls");
-		drawTable(width, height, left, top);
+		drawBox(width, height, left, top);
 		gotoXY(58, 6); cout << "STUDENT";
 		gotoXY(48, 9); cout << "View profile";
 		gotoXY(48, 10); cout << "Log out";

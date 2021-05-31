@@ -35,9 +35,24 @@ struct User {
 	User* prev;
 	User* next;
 };
-struct List {
+struct Student {
+	string studentID;
+	string lastName;
+	string firstName;
+	string gender;
+	string socialID;
+	Date dateOfBirth;
+	Student* prev;
+	Student* next;
+};
+struct ListUser {
 	User* pHead;
 	User* pTail;
+	int size;
+};
+struct ListStudent {
+	Student* pHead;
+	Student* pTail;
 	int size;
 };
 
@@ -49,15 +64,18 @@ bool dirExists(const std::string& dirName_in);
 string* ls(string folder);
 int removeDir(string dirPath);
 
-void drawTable(int width, int height, int left, int top);
+void drawBox(int width, int height, int left, int top);
 void loading(int x, int y);
 
-void addUser(List& list, User* user);
+void addUser(ListUser& list, User* user);
+void addStudent(ListStudent& list, Student* student);
 void saveListUser();
+void initList(ListUser& list);
+void initList(ListStudent& list);
 void getCurrentDate();
 void getCurrentSchoolYear();
 
 extern User* currentUser;
-extern List listUser;
+extern ListUser listUser;
 extern Date currentDate;
 extern string currentSchoolYear;

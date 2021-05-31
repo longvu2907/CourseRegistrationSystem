@@ -5,7 +5,7 @@ using namespace std;
 const string userDataPath = "data/Accounts/users.csv";
 string id, password;
 User* currentUser = NULL;
-List listUser;
+ListUser listUser;
 int yPos = 13;
 
 User* convertData(ifstream& data) {
@@ -28,12 +28,7 @@ User* convertData(ifstream& data) {
 	usersData->prev = NULL;
 	return usersData;
 }
-void initList(List& list) {
-	list.pHead = NULL;
-	list.pTail = NULL;
-	list.size = 0;
-}
-void readUsersData(List& listUsers) {
+void readUsersData(ListUser& listUsers) {
 	ifstream fin(userDataPath);
 	string  data = "";
 	getline(fin, data);
@@ -44,7 +39,7 @@ void readUsersData(List& listUsers) {
 	}
 }
 
-User* login(string id, string password, List list) {
+User* login(string id, string password, ListUser list) {
 	User* data = list.pHead;
 	while (data != NULL) {
 		if (id == data->id) {
@@ -112,13 +107,13 @@ string getPassword(bool isHidden) {
 	}
 }
 
-void loginUI(List listUser) {
+void loginUI(ListUser listUser) {
 	const int width = 40;
 	const int height = 10;
 	const int left = 40;
 	const int top = 10;
 
-	drawTable(width, height, left, top);
+	drawBox(width, height, left, top);
 	gotoXY(52, 6);
 	cout << "HCMUS PORTAL - LOGIN";
 	gotoXY(40, 8); cout << currentDate.wDay;

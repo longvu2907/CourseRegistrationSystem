@@ -113,7 +113,7 @@ void clearLine(int y) {
 	printf("%c[2K", 27);
 }
 
-void drawTable(int width, int height, int left, int top) {
+void drawBox(int width, int height, int left, int top) {
 	gotoXY(left, top);
 	cout << char(201);
 	for (int i = 0; i < width; i++) {
@@ -142,7 +142,7 @@ void loading(int x, int y) {
 	}
 }
 
-void addUser(List& list, User* user) {
+void addUser(ListUser& list, User* user) {
 	if (user == NULL) return;
 	if (list.pHead == NULL) {
 		list.pHead = list.pTail = user;
@@ -152,6 +152,27 @@ void addUser(List& list, User* user) {
 		user->prev = list.pTail;
 		list.pTail = user;
 	}
+}
+void addStudent(ListStudent& list, Student* student) {
+	if (student == NULL) return;
+	if (list.pHead == NULL) {
+		list.pHead = list.pTail = student;
+	}
+	else {
+		list.pTail->next = student;
+		student->prev = list.pTail;
+		list.pTail = student;
+	}
+}
+void initList(ListUser& list) {
+	list.pHead = NULL;
+	list.pTail = NULL;
+	list.size = 0;
+}
+void initList(ListStudent& list) {
+	list.pHead = NULL;
+	list.pTail = NULL;
+	list.size = 0;
 }
 void saveListUser() {
 	ofstream fout(userDataPath);
