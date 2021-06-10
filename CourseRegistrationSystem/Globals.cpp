@@ -4,6 +4,14 @@ const string userDataPath = "Data/Accounts/users.csv";
 Date currentDate;
 string currentSchoolYear;
 
+int dayofweek(int d, int m, int y)
+{
+	static int t[] = { 0, 3, 2, 5, 0, 3,
+					   5, 1, 4, 6, 2, 4 };
+	y -= m < 3;
+	return (y + y / 4 - y / 100 +
+		y / 400 + t[m - 1] + d) % 7;
+}
 Date strToDate(string str) {
 	Date date;
 	date.day = stoi(str.substr(0, str.find('/')));
@@ -12,6 +20,31 @@ Date strToDate(string str) {
 	str.erase(0, str.find('/') + 1);
 	date.year = stoi(str.substr(0, str.find('/')));
 	str.erase(0, str.find('/') + 1);
+	string wDay;
+	switch (dayofweek(date.day, date.month, date.year)) {
+	case 0:
+		wDay = "Sun";
+		break;
+	case 1:
+		wDay = "Mon";
+		break;
+	case 2:
+		wDay = "Tue";
+		break;
+	case 3:
+		wDay = "Wed";
+		break;
+	case 4:
+		wDay = "Thu";
+		break;
+	case 5:
+		wDay = "Fri";
+		break;
+	case 6:
+		wDay = "Sat";
+		break;
+	}
+	date.wDay = wDay;
 	return date;
 }
 void gotoXY(int x, int y) {
@@ -37,82 +70,32 @@ bool dirExists(const std::string& dirName_in)
 
 	return false;    // this is not a directory!
 }
-int removeDir(string dirPath)
-{
-	struct _finddata_t fb;   //find the storage structure of the same properties file.
-	string path;
-	long    handle;
-	int  resultone;
-	int   noFile;            // the tag for the system's hidden files
-
-	noFile = 0;
-	handle = 0;
-
-	path = dirPath + "/*";
-
-	handle = _findfirst(path.c_str(), &fb);
-
-	//find the first matching file
-	if (handle != -1)
-	{
-		//find next matching file
-		while (0 == _findnext(handle, &fb))
-		{
-			// "." and ".." are not processed
-			noFile = strcmp(fb.name, "..");
-
-			if (0 != noFile)
-			{
-				path.clear();
-				path = dirPath + "/" + fb.name;
-
-				//fb.attrib == 48 means folder
-				if (fb.attrib == 48)
-				{
-					removeDir(path);
-				}
-				else
-				{
-					//not folder, delete it. if empty folder, using _rmdir istead.
-					remove(path.c_str());
-				}
-			}
-		}
-		// close the folder and delete it only if it is closed. For standard c, using closedir instead(findclose -> closedir).
-		// when Handle is created, it should be closed at last.  
-		_findclose(handle);
-	}
-	_rmdir(dirPath.c_str());
-	return 0;
-}
-string* ls(string folder)
-{
-	string* names = new string[15];
-	string s = folder + "/*.*";
-	wstring search_path = wstring(s.begin(), s.end());
-	WIN32_FIND_DATA fd;
-	HANDLE hFind = ::FindFirstFile(search_path.c_str(), &fd);
-	int i = 0;
-	if (hFind != INVALID_HANDLE_VALUE) {
-		do {
-			// read all (real) files in current folder
-			// , delete '!' read other 2 default folder . and ..
-			if (!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
-				wstring ws(fd.cFileName);
-				string str(ws.begin(), ws.end());
-				names[i] = str;
-				i++;
-			}
-		} while (::FindNextFile(hFind, &fd));
-		::FindClose(hFind);
-	}
-	return names;
+void copyFolder(string from, string to) {
+	const auto copyOptions = filesystem::copy_options::update_existing
+		| filesystem::copy_options::recursive
+		;
+	filesystem::copy(from, to, copyOptions);
 }
 void clearLine(int y) {
 	gotoXY(0, y);
 	printf("%c[2K", 27);
 }
 
+void notifyBox(string msg) {
+	hideCursor(true);
+	system("cls");
+	int width = 45;
+	int height = 6;
+	int left = 40;
+	int top = 9;
+
+	drawBox(width, height, left, top);
+	gotoXY(57, 8); cout << "NOTIFICATION";
+	gotoXY(45, 11); cout << msg;
+	gotoXY(45, 13); cout << "Press any key to continue...";
+	_getch();
+	system("cls");
+}
 void drawBox(int width, int height, int left, int top) {
 	gotoXY(left, top);
 	cout << char(201);
@@ -135,11 +118,19 @@ void drawBox(int width, int height, int left, int top) {
 		cout << char(186);
 	}
 }
-void loading(int x, int y) {
-	for (int i = 0; i < 20; i++) {
-		gotoXY(i + x, y); cout << char(219);
-		Sleep(100);
+void loading(string text) {
+	system("cls");
+	int width = 40;
+	int height = 2;
+	int left = 40;
+	int top = 9;
+	gotoXY(55, 8); cout << text;
+	drawBox(width, height, left, top);
+	for (int i = 0; i < 40; i++) {
+		gotoXY(i + 41, 10); cout << char(219);
+		Sleep(10);
 	}
+	system("cls");
 }
 
 void addUser(ListUser& list, User* user) {
@@ -152,6 +143,7 @@ void addUser(ListUser& list, User* user) {
 		user->prev = list.pTail;
 		list.pTail = user;
 	}
+	list.size++;
 }
 void addStudent(ListStudent& list, Student* student) {
 	if (student == NULL) return;
@@ -163,6 +155,7 @@ void addStudent(ListStudent& list, Student* student) {
 		student->prev = list.pTail;
 		list.pTail = student;
 	}
+	list.size++;
 }
 void initList(ListUser& list) {
 	list.pHead = NULL;
@@ -184,6 +177,20 @@ void saveListUser() {
 			<< "," << curr->className << "," << curr->gender << "," << dateOfBirth << ",";
 		if (curr->isStaff) fout << "TRUE" << endl;
 		else fout << "FALSE" << endl;
+		curr = curr->next;
+	}
+}
+void saveClass(string path, ListStudent listStudent) {
+	ofstream fout(path);
+	fout << "No,Student ID,Last name,First name,Gender,Date of Birth,Social ID" << endl;
+	Student* curr = listStudent.pHead;
+	int no = 1;
+	while (curr != NULL) {
+		string dateOfBirth = to_string(curr->dateOfBirth.day) + "/" + to_string(curr->dateOfBirth.month) + "/" + to_string(curr->dateOfBirth.year);
+		fout << no << "," << curr->studentID << "," << curr->lastName << "," << curr->firstName << "," << curr->gender
+			<< "," << dateOfBirth << "," << curr->socialID;
+		fout << endl;
+		no++;
 		curr = curr->next;
 	}
 }

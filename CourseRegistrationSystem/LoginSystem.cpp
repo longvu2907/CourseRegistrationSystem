@@ -141,20 +141,10 @@ void loginSystem() {
 		hideCursor(false);
 		loginUI(listUser);
 		if (currentUser == NULL) {
-			gotoXY(55, yPos + 5);
-			cout << "Wrong !!!!!";
-			gotoXY(50, yPos + 6);
-			cout << "Enter to try again...";
-			_getch();
-			system("cls");
+			notifyBox("LOGIN FAIL!");
 		}
 		else {
-			gotoXY(55, yPos + 5);
-			cout << "Successful";
-			gotoXY(50, yPos + 6);
-			cout << "Enter to continue...";
-			_getch();
-			system("cls");
+			notifyBox("LOGIN SUCCEEDED");
 			break;
 		}
 	}

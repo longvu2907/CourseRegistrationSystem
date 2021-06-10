@@ -9,7 +9,8 @@
 #include <functional>
 #include <time.h>
 #include <direct.h>
-#include<io.h>
+#include <io.h>
+#include <filesystem>
 
 #include "AcademicStaff.h"
 #include "Student.h"
@@ -54,6 +55,9 @@ struct ListStudent {
 	Student* pHead;
 	Student* pTail;
 	int size;
+	string program;
+	string className;
+	string year;
 };
 
 Date strToDate(string);
@@ -61,15 +65,16 @@ void gotoXY(int x, int y);
 void clearLine(int y);
 void hideCursor(bool);
 bool dirExists(const std::string& dirName_in);
-string* ls(string folder);
-int removeDir(string dirPath);
+void copyFolder(string from, string to);
 
 void drawBox(int width, int height, int left, int top);
-void loading(int x, int y);
+void loading(string text);
+void notifyBox(string msg);
 
 void addUser(ListUser& list, User* user);
 void addStudent(ListStudent& list, Student* student);
 void saveListUser();
+void saveClass(string path, ListStudent listStudent);
 void initList(ListUser& list);
 void initList(ListStudent& list);
 void getCurrentDate();
