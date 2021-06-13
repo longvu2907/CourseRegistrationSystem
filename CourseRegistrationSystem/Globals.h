@@ -17,6 +17,7 @@
 #include "LoginSystem.h"
 
 using namespace std;
+namespace fs = filesystem;
 
 struct Date {
 	int year;
@@ -59,6 +60,11 @@ struct ListStudent {
 	string className;
 	string year;
 };
+struct Semester {
+	int semester;
+	Date startDate, endDate;
+};
+
 
 Date strToDate(string);
 void gotoXY(int x, int y);
@@ -77,10 +83,14 @@ void saveListUser();
 void saveClass(string path, ListStudent listStudent);
 void initList(ListUser& list);
 void initList(ListStudent& list);
+bool isExpired(Date currentDate, Date endDate);
 void getCurrentDate();
 void getCurrentSchoolYear();
+void getCurrentSemester();
 
 extern User* currentUser;
 extern ListUser listUser;
 extern Date currentDate;
 extern string currentSchoolYear;
+extern Semester currentSemester;
+extern string semesterPath;

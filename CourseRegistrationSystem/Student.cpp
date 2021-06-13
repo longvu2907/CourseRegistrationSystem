@@ -78,4 +78,3 @@ int subOption2(int curPos) {
 	return 1;
 }
 
-

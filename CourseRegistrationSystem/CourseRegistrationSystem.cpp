@@ -1,13 +1,10 @@
 ﻿#include "Globals.h" 
 
-#include <filesystem>
-
-
-
 void main() {
 	while (true) {
 		getCurrentDate();
 		getCurrentSchoolYear();
+		getCurrentSemester();
 		loginSystem();
 		if (currentUser->isStaff) {
 			staffMenu();
@@ -17,5 +14,4 @@ void main() {
 		}
 		system("cls");
 	}
-
 }

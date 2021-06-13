@@ -3,6 +3,8 @@
 const string userDataPath = "Data/Accounts/users.csv";
 Date currentDate;
 string currentSchoolYear;
+Semester currentSemester;
+string semesterpath;
 
 int dayofweek(int d, int m, int y)
 {
@@ -208,6 +210,19 @@ const string currentDateTime() {
 
 	return "";
 }
+bool isExpired(Date now, Date endDate) {
+	if (endDate.wDay == "") return true;
+	if (now.year > endDate.year) return true;
+	else if (now.year < endDate.year) return false;
+	else {
+		if (now.month > endDate.month) return true;
+		else if (now.month < endDate.month) return false;
+		else {
+			if (now.day > endDate.day) return true;
+			else return false;
+		}
+	}
+}
 void getCurrentDate() {
 	time_t now = time(0);
 	tm ltm;
@@ -243,11 +258,22 @@ void getCurrentDate() {
 }
 void getCurrentSchoolYear() {
 	const int beginSchoolYearMonth = 9;
-
 	if (currentDate.month < beginSchoolYearMonth) {
 		currentSchoolYear = to_string(currentDate.year - 1) + "-" + to_string(currentDate.year);
 	}
 	else {
 		currentSchoolYear = to_string(currentDate.year) + "-" + to_string(currentDate.year + 1);
 	}
+}
+void getCurrentSemester() {
+	ifstream fin("data/" + currentSchoolYear + "/semester.txt");
+	if (!fin) return;
+	fin >> currentSemester.semester;
+	string startDate, endDate, s;
+	getline(fin, s);
+	getline(fin, startDate);
+	getline(fin, endDate);
+	currentSemester.startDate = strToDate(startDate);
+	currentSemester.endDate = strToDate(endDate);
+	semesterPath = "data/" + currentSchoolYear + "/semester " + to_string(currentSemester.semester);
 }

@@ -2,7 +2,7 @@
 
 using namespace std;
 
-const string userDataPath = "data/Accounts/users.csv";
+const string userDataPath = "data/accounts/users.csv";
 string id, password;
 User* currentUser = NULL;
 ListUser listUser;
