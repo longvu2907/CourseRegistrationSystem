@@ -26,7 +26,6 @@ void staffMenu() {
 	int yPos = 9;
 	do {
 		hideCursor(true);
-		getCurrentSchoolYear();
 		schoolYearPath = "./data/" + currentSchoolYear;
 		system("cls");
 		drawBox(width, height, left, top);
@@ -370,9 +369,12 @@ void createClasses() {
 void newSchoolYear() {
 	int lastYear = stoi(currentSchoolYear.substr(0, 4));
 	string prevSchoolYearPath = "./data/" + to_string(lastYear - 1) + "-" + to_string(lastYear);
-	string classesPath = schoolYearPath + "/classes/";
+	string classesPath = schoolYearPath + "/classes";
 	if (dirExists(prevSchoolYearPath)) {
-		copyFolder(prevSchoolYearPath, schoolYearPath);
+		fs::create_directories(classesPath);
+		ofstream(schoolYearPath + "/semester.txt");
+		prevSchoolYearPath += "/classes";
+		copyFolder(prevSchoolYearPath, classesPath);
 		fs::remove_all(classesPath + "/final-year student");
 		fs::rename(classesPath + "/third-year student", classesPath + "/final-year student");
 		fs::rename(classesPath + "/second-year student", classesPath + "/third-year student");
@@ -383,6 +385,7 @@ void newSchoolYear() {
 		fs::create_directories(classesPath + "/first-year student/VP");
 	}
 	else {
+		ofstream(schoolYearPath + "/semester.txt");
 		fs::create_directories(classesPath + "/first-year student/APCS");
 		fs::create_directories(classesPath + "/first-year student/CTT");
 		fs::create_directories(classesPath + "/first-year student/CLC");
@@ -504,6 +507,22 @@ void semesterInfo() {
 	} while (command(curPos, 0, 0, semesterInfoOption));
 
 }
+void createCoursesReg() {
+	const int width = 40;
+	const int height = 10;
+	const int left = 40;
+	const int top = 8;
+
+	system("cls");
+	int semester;
+	string startDate, endDate;
+	hideCursor(false);
+	drawBox(width, height, left, top);
+	gotoXY(48, 12); cout << "Start date: "; cin >> startDate;
+	gotoXY(48, 13); cout << "End date: "; cin >> endDate;
+	hideCursor(true);
+}
+
 void manageCourses() {
 	const int width = 40;
 	const int height = 10;
@@ -530,8 +549,8 @@ void manageCourses() {
 		gotoXY(48, yPos); cout << "Back";
 		yPos++;
 		yPos = 9;
-		gotoXY(70, curPos + yPos); cout << cursor;
-	} while (command(curPos, 0, 1, manageCoursesOption));
+		gotoXY(76, curPos + yPos); cout << cursor;
+	} while (command(curPos, 0, 2, manageCoursesOption));
 }
 
 //Setting
@@ -551,6 +570,8 @@ void setting() {
 	gotoXY(45, 12); cout << "Change Date: "; getline(cin, date);
 	currentDate = strToDate(date);
 	hideCursor(true);
+	getCurrentSchoolYear();
+	getCurrentSemester();
 	system("cls");
 }
 
@@ -637,6 +658,9 @@ int manageCoursesOption(int curPos) {
 		else semesterInfo();
 		break;
 	case 1:
+		createCoursesReg();
+		break;
+	case 2:
 		return 0;
 		break;
 	}

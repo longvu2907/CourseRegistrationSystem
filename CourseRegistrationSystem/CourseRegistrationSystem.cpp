@@ -13,5 +13,5 @@ void main() {
 			studentMenu();
 		}
 		system("cls");
-	}
+	}	
 }

@@ -5,6 +5,7 @@ Date currentDate;
 string currentSchoolYear;
 Semester currentSemester;
 string semesterPath;
+ListCourses listCourses;
 
 int dayofweek(int d, int m, int y)
 {
@@ -162,6 +163,18 @@ void addStudent(ListStudent& list, Student* student) {
 	}
 	list.size++;
 }
+void addCourse(ListCourses& list, Course* course) {
+	if (course == NULL) return;
+	if (list.head == NULL) {
+		list.head = list.tail = course;
+	}
+	else {
+		list.tail->next = course;
+		course->prev = list.tail;
+		list.tail = course;
+	}
+	list.size++;
+}
 void initList(ListUser& list) {
 	list.pHead = NULL;
 	list.pTail = NULL;
@@ -170,6 +183,12 @@ void initList(ListUser& list) {
 void initList(ListStudent& list) {
 	list.pHead = NULL;
 	list.pTail = NULL;
+	list.size = 0;
+}
+void initList(ListCourses& list) {
+	list.head = NULL;
+	list.tail = NULL;
+	list.startDate = list.endDate = strToDate("0/0/0");
 	list.size = 0;
 }
 void saveListUser() {
@@ -226,6 +245,38 @@ bool isExpired(Date now, Date endDate) {
 		}
 	}
 }
+bool isOnRegSession() {
+	return isExpired(listCourses.startDate, currentDate) && !isExpired(currentDate, listCourses.endDate);
+}
+Course* convertData(ifstream& data) {
+	Course* course = new Course;
+	string credits, maxStudents;
+	getline(data, course->id, ',');
+	getline(data, course->name, ',');
+	getline(data, course->teacherName, ',');
+	getline(data, credits, ',');
+	course->credits = stoi(credits);
+	getline(data, maxStudents, ',');
+	course->maxStudents = stoi(maxStudents);
+	getline(data, course->wDay, ',');
+	getline(data, course->session, '\n');
+	return course;
+}
+void getListCourses() {
+	ifstream fin(semesterPath + "/courses.txt");
+	initList(listCourses);
+	string start, end;
+	getline(fin, start);
+	getline(fin, end);
+	listCourses.startDate = strToDate(start);
+	listCourses.endDate = strToDate(end);
+	while (!fin.eof()) {
+		addCourse(listCourses, convertData(fin));
+		listCourses.size++;
+	}
+
+
+}
 void getCurrentDate() {
 	time_t now = time(0);
 	tm ltm;
@@ -276,7 +327,14 @@ void getCurrentSemester() {
 	getline(fin, s);
 	getline(fin, startDate);
 	getline(fin, endDate);
-	currentSemester.startDate = strToDate(startDate);
-	currentSemester.endDate = strToDate(endDate);
-	semesterPath = "data/" + currentSchoolYear + "/semester " + to_string(currentSemester.semester);
+	if (startDate == "" || endDate == "") {
+		currentSemester.semester = 0;
+		currentSemester.startDate = strToDate("0/0/0");
+		currentSemester.endDate = strToDate("0/0/0");
+	}
+	else {
+		currentSemester.startDate = strToDate(startDate);
+		currentSemester.endDate = strToDate(endDate);
+		semesterPath = "data/" + currentSchoolYear + "/semester " + to_string(currentSemester.semester);
+	}
 }

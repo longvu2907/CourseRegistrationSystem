@@ -79,6 +79,7 @@ struct ListCourses {
 	Course* head;
 	Course* tail;
 	Date startDate, endDate;
+	int size;
 };
 
 Date strToDate(string str);
@@ -100,6 +101,8 @@ void saveClass(string path, ListStudent listStudent);
 void initList(ListUser& list);
 void initList(ListStudent& list);
 bool isExpired(Date currentDate, Date endDate);
+bool isOnRegSession();
+void getListCourses();
 void getCurrentDate();
 void getCurrentSchoolYear();
 void getCurrentSemester();
@@ -110,3 +113,4 @@ extern Date currentDate;
 extern string currentSchoolYear;
 extern Semester currentSemester;
 extern string semesterPath;
+extern ListCourses listCourses;
