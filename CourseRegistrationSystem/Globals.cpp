@@ -4,7 +4,7 @@ const string userDataPath = "Data/Accounts/users.csv";
 Date currentDate;
 string currentSchoolYear;
 Semester currentSemester;
-string semesterpath;
+string semesterPath;
 
 int dayofweek(int d, int m, int y)
 {
@@ -48,6 +48,9 @@ Date strToDate(string str) {
 	}
 	date.wDay = wDay;
 	return date;
+}
+string dateToStr(Date date) {
+	return to_string(date.day) + "/" + to_string(date.month) + "/" + to_string(date.year);
 }
 void gotoXY(int x, int y) {
 	COORD coord;

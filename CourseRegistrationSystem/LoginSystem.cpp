@@ -117,7 +117,7 @@ void loginUI(ListUser listUser) {
 	gotoXY(52, 6);
 	cout << "HCMUS PORTAL - LOGIN";
 	gotoXY(40, 8); cout << currentDate.wDay;
-	gotoXY(40, 9); cout << currentDate.day << '/' << currentDate.month << '/' << currentDate.year;
+	gotoXY(40, 9); cout << dateToStr(currentDate);
 	gotoXY(48, yPos);
 	cout << "ID:";
 	gotoXY(48, yPos + 2);

@@ -37,6 +37,11 @@ struct User {
 	User* prev;
 	User* next;
 };
+struct ListUser {
+	User* pHead;
+	User* pTail;
+	int size;
+};
 struct Student {
 	string studentID;
 	string lastName;
@@ -46,11 +51,6 @@ struct Student {
 	Date dateOfBirth;
 	Student* prev;
 	Student* next;
-};
-struct ListUser {
-	User* pHead;
-	User* pTail;
-	int size;
 };
 struct ListStudent {
 	Student* pHead;
@@ -64,9 +64,25 @@ struct Semester {
 	int semester;
 	Date startDate, endDate;
 };
+struct Course {
+	string id;
+	string name;
+	string teacherName;
+	int credits;
+	int maxStudents = 50;
+	string wDay;
+	string session;
+	Course* prev;
+	Course* next;
+};
+struct ListCourses {
+	Course* head;
+	Course* tail;
+	Date startDate, endDate;
+};
 
-
-Date strToDate(string);
+Date strToDate(string str);
+string dateToStr(Date date);
 void gotoXY(int x, int y);
 void clearLine(int y);
 void hideCursor(bool);

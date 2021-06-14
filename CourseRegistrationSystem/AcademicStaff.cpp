@@ -32,7 +32,7 @@ void staffMenu() {
 		drawBox(width, height, left, top);
 		gotoXY(55, yPos - 4); cout << "HCMUS Portal";
 		gotoXY(40, yPos - 3); cout << currentDate.wDay;
-		gotoXY(40, yPos - 2); cout << currentDate.day << '/' << currentDate.month << '/' << currentDate.year;
+		gotoXY(40, yPos - 2); cout << dateToStr(currentDate);
 		gotoXY(75, yPos - 3); cout << "Welcome ";
 		gotoXY(75, yPos - 2); cout << currentUser->lastName << " " << currentUser->firstName;
 		gotoXY(48, yPos); cout << "User account" ;
@@ -324,6 +324,7 @@ void importData() {
 	hideCursor(true);
 	writeToFile(listStudent);
 	addStudentAccount(listStudent);
+	notifyBox("Created new class");
 }
 int createClassOption(int curPos) {
 	switch (curPos) {
@@ -368,17 +369,37 @@ void createClasses() {
 }
 void newSchoolYear() {
 	int lastYear = stoi(currentSchoolYear.substr(0, 4));
-	string previousSchoolYearPath = "./data/" + to_string(lastYear - 1) + "-" + to_string(lastYear);
-	copyFolder(previousSchoolYearPath, schoolYearPath);
+	string prevSchoolYearPath = "./data/" + to_string(lastYear - 1) + "-" + to_string(lastYear);
 	string classesPath = schoolYearPath + "/classes/";
-	fs::remove_all(classesPath + "/final-year student");
-	fs::rename(classesPath + "/third-year student", classesPath + "/final-year student");
-	fs::rename(classesPath + "/second-year student", classesPath + "/third-year student");
-	fs::rename(classesPath + "/first-year student", classesPath + "/second-year student");
-	fs::create_directories(classesPath + "/first-year student/APCS");
-	fs::create_directories(classesPath + "/first-year student/CTT");
-	fs::create_directories(classesPath + "/first-year student/CLC");
-	fs::create_directories(classesPath + "/first-year student/VP");
+	if (dirExists(prevSchoolYearPath)) {
+		copyFolder(prevSchoolYearPath, schoolYearPath);
+		fs::remove_all(classesPath + "/final-year student");
+		fs::rename(classesPath + "/third-year student", classesPath + "/final-year student");
+		fs::rename(classesPath + "/second-year student", classesPath + "/third-year student");
+		fs::rename(classesPath + "/first-year student", classesPath + "/second-year student");
+		fs::create_directories(classesPath + "/first-year student/APCS");
+		fs::create_directories(classesPath + "/first-year student/CTT");
+		fs::create_directories(classesPath + "/first-year student/CLC");
+		fs::create_directories(classesPath + "/first-year student/VP");
+	}
+	else {
+		fs::create_directories(classesPath + "/first-year student/APCS");
+		fs::create_directories(classesPath + "/first-year student/CTT");
+		fs::create_directories(classesPath + "/first-year student/CLC");
+		fs::create_directories(classesPath + "/first-year student/VP");
+		fs::create_directories(classesPath + "/second-year student/APCS");
+		fs::create_directories(classesPath + "/second-year student/CTT");
+		fs::create_directories(classesPath + "/second-year student/CLC");
+		fs::create_directories(classesPath + "/second-year student/VP");
+		fs::create_directories(classesPath + "/third-year student/APCS");
+		fs::create_directories(classesPath + "/third-year student/CTT");
+		fs::create_directories(classesPath + "/third-year student/CLC");
+		fs::create_directories(classesPath + "/third-year student/VP");
+		fs::create_directories(classesPath + "/final-year student/APCS");
+		fs::create_directories(classesPath + "/final-year student/CTT");
+		fs::create_directories(classesPath + "/final-year student/CLC");
+		fs::create_directories(classesPath + "/final-year student/VP");
+	}
 }
 void createSchoolYear() {
 	if (dirExists(schoolYearPath)) {
@@ -428,11 +449,10 @@ void newSemester(string semesterFolder, int semester, string startDate, string e
 		loading("Creating...");
 		fs::create_directory(schoolYearPath + "/" + semesterFolder);
 		fout << semester << '\n' << startDate << '\n' << endDate;
+		notifyBox("Created new semester.");
 	}
 }
 void createSemester(){
-	int yPos = 2;
-	int xPos = 17;
 	int width = 40;
 	int height = 8;
 	int left = 40;
@@ -451,7 +471,37 @@ void createSemester(){
 	getCurrentSemester();
 	hideCursor(true);
 }
+int semesterInfoOption(int curPos) {
+	switch (curPos) {
+	case 0:
+		return 0;
+		break;
+	}
+	return 1;
+}
 void semesterInfo() {
+	int width = 40;
+	int height = 8;
+	int left = 40;
+	int top = 8;
+	int curPos = 0;
+	int yPos = 9;
+
+	do {
+		system("cls");
+		drawBox(width, height, left, top);
+		gotoXY(55, yPos - 4); cout << "HCMUS Portal";
+		gotoXY(52, yPos - 2); cout << "Semester Infomation";
+		gotoXY(48, yPos); cout << "Semester " << currentSemester.semester;
+		yPos++;
+		gotoXY(48, yPos); cout << "Start date: " << dateToStr(currentSemester.startDate);
+		yPos++;
+		gotoXY(48, yPos); cout << "End date: " << dateToStr(currentSemester.endDate);
+		yPos += 2;
+		gotoXY(48, yPos); cout << "Back";
+		gotoXY(70, curPos + yPos); cout << cursor;
+		yPos = 9;
+	} while (command(curPos, 0, 0, semesterInfoOption));
 
 }
 void manageCourses() {
@@ -472,9 +522,11 @@ void manageCourses() {
 			yPos++;
 		}
 		else {
-			gotoXY(48, yPos); cout << "Current semester infomation";
+			gotoXY(48, yPos); cout << "Semester Infomation";
 			yPos++;
 		}
+		gotoXY(48, yPos); cout << "Create Courses Registration";
+		yPos++;
 		gotoXY(48, yPos); cout << "Back";
 		yPos++;
 		yPos = 9;
