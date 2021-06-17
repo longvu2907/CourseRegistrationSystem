@@ -59,6 +59,9 @@ void gotoXY(int x, int y) {
 	coord.Y = y;
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
 }
+void toUpper(string& s) {
+	transform(s.begin(), s.end(), s.begin(), ::toupper);
+}
 void hideCursor(bool isHiden) {
 	CONSOLE_CURSOR_INFO cursor;
 	GetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursor);
@@ -173,7 +176,6 @@ void addCourse(ListCourses& list, Course* course) {
 		course->prev = list.tail;
 		list.tail = course;
 	}
-	list.size++;
 }
 void initList(ListUser& list) {
 	list.pHead = NULL;
@@ -189,7 +191,6 @@ void initList(ListCourses& list) {
 	list.head = NULL;
 	list.tail = NULL;
 	list.startDate = list.endDate = strToDate("0/0/0");
-	list.size = 0;
 }
 void saveListUser() {
 	ofstream fout(userDataPath);
@@ -203,6 +204,7 @@ void saveListUser() {
 		else fout << "FALSE" << endl;
 		curr = curr->next;
 	}
+	fout.close();
 }
 void saveClass(string path, ListStudent listStudent) {
 	ofstream fout(path);
@@ -217,6 +219,22 @@ void saveClass(string path, ListStudent listStudent) {
 		no++;
 		curr = curr->next;
 	}
+	fout.close();
+}
+void saveCourses() {
+	ofstream fout(semesterPath + "/courses.csv");
+	fout << "Courses registration session:," << dateToStr(listCourses.startDate) << "-"
+		<< dateToStr(listCourses.endDate) << endl;
+	fout << "ID,Course name,Teacher name,Number of credits,Max students,Day of week,Session" << endl;
+	Course* temp = listCourses.head;
+	while (temp != NULL) {
+		toUpper(temp->wDay);
+		string session = temp->session[0] + "-" + temp->session[1];
+		fout << temp->id << "," << temp->courseName << "," << temp->teacherName << ","
+			<< temp->credits << "," << temp->maxStudents << "," << temp->wDay << "," << session << endl;
+		temp = temp->next;
+	}
+	fout.close();
 }
 
 const string currentDateTime() {
@@ -240,7 +258,7 @@ bool isExpired(Date now, Date endDate) {
 		if (now.month > endDate.month) return true;
 		else if (now.month < endDate.month) return false;
 		else {
-			if (now.day > endDate.day) return true;
+			if (now.day >= endDate.day) return true;
 			else return false;
 		}
 	}
@@ -250,32 +268,37 @@ bool isOnRegSession() {
 }
 Course* convertData(ifstream& data) {
 	Course* course = new Course;
-	string credits, maxStudents;
+	string credits, maxStudents, session;
 	getline(data, course->id, ',');
-	getline(data, course->name, ',');
+	if (course->id == "") return NULL;
+	getline(data, course->courseName, ',');
 	getline(data, course->teacherName, ',');
 	getline(data, credits, ',');
 	course->credits = stoi(credits);
 	getline(data, maxStudents, ',');
 	course->maxStudents = stoi(maxStudents);
 	getline(data, course->wDay, ',');
-	getline(data, course->session, '\n');
+	getline(data, session, '\n');
+	course->session[0] = session.substr(session.find('S'), 2);
+	session.erase(session.find('S'), 2);
+	course->session[1] = session.substr(session.find('S'), 2);
+	course->next = NULL;
 	return course;
 }
 void getListCourses() {
-	ifstream fin(semesterPath + "/courses.txt");
+	ifstream fin(semesterPath + "/courses.csv");
 	initList(listCourses);
+	string s;
 	string start, end;
-	getline(fin, start);
-	getline(fin, end);
+	getline(fin, s);
+	start = s.substr(s.find(',') + 1, 10);
+	end = s.substr(s.find('-') + 1, 10);
 	listCourses.startDate = strToDate(start);
 	listCourses.endDate = strToDate(end);
+	getline(fin, s);
 	while (!fin.eof()) {
 		addCourse(listCourses, convertData(fin));
-		listCourses.size++;
 	}
-
-
 }
 void getCurrentDate() {
 	time_t now = time(0);

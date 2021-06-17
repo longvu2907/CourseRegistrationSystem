@@ -137,6 +137,9 @@ void loginUI(ListUser listUser) {
 void loginSystem() {
 	system("cls");
 	readUsersData(listUser);
+	getCurrentDate();
+	getCurrentSchoolYear();
+	getCurrentSemester();
 	while (true) {
 		hideCursor(false);
 		loginUI(listUser);

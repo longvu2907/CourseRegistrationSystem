@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -66,12 +67,12 @@ struct Semester {
 };
 struct Course {
 	string id;
-	string name;
+	string courseName;
 	string teacherName;
 	int credits;
 	int maxStudents = 50;
 	string wDay;
-	string session;
+	string session[2];
 	Course* prev;
 	Course* next;
 };
@@ -79,12 +80,12 @@ struct ListCourses {
 	Course* head;
 	Course* tail;
 	Date startDate, endDate;
-	int size;
 };
 
 Date strToDate(string str);
 string dateToStr(Date date);
 void gotoXY(int x, int y);
+void toUpper(string& s);
 void clearLine(int y);
 void hideCursor(bool);
 bool dirExists(const std::string& dirName_in);
@@ -96,8 +97,11 @@ void notifyBox(string msg);
 
 void addUser(ListUser& list, User* user);
 void addStudent(ListStudent& list, Student* student);
+void addCourse(ListCourses& list, Course* course);
 void saveListUser();
 void saveClass(string path, ListStudent listStudent);
+void saveCourses();
+
 void initList(ListUser& list);
 void initList(ListStudent& list);
 bool isExpired(Date currentDate, Date endDate);

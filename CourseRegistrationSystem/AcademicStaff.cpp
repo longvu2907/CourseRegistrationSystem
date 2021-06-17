@@ -439,6 +439,24 @@ void manageStudent() {
 }
 
 //Manage Courses
+int viewCourseOption(int curPos) {
+	int count = 0;
+	Course* temp = listCourses.head;
+	while (temp != NULL) {
+		count++;
+		temp = temp->next;
+	}
+	switch (curPos) {
+		for (int i = 0; i < count; i++) {
+	case i:
+
+		}
+	default:
+		return 0;
+		break;
+	}
+	return 1;
+}
 void newSemester(string semesterFolder, int semester, string startDate, string endDate) {
 	
 	if (dirExists(schoolYearPath + "/" + semesterFolder)) {
@@ -514,15 +532,91 @@ void createCoursesReg() {
 	const int top = 8;
 
 	system("cls");
-	int semester;
+
 	string startDate, endDate;
 	hideCursor(false);
+	gotoXY(55, 5); cout << "HCMUS Portal";
+	gotoXY(52, 7); cout << "Courses Registration";
 	drawBox(width, height, left, top);
-	gotoXY(48, 12); cout << "Start date: "; cin >> startDate;
-	gotoXY(48, 13); cout << "End date: "; cin >> endDate;
+	gotoXY(48, 10); cout << "Current registration session: ";
+	gotoXY(48, 11); cout << dateToStr(listCourses.startDate) << "-" << dateToStr(listCourses.endDate);
+	gotoXY(48, 12); cout << "Start date: "; 
+	gotoXY(48, 13); cout << "End date: ";
+	gotoXY(60, 12); cin >> startDate;
+	gotoXY(58, 13); cin >> endDate;
+	listCourses.startDate = strToDate(startDate);
+	listCourses.endDate = strToDate(endDate);
 	hideCursor(true);
 }
+void createCourse() {
+	const int width = 40;
+	const int height = 10;
+	const int left = 40;
+	const int top = 8;
 
+	system("cls");
+	Course* newCourse = new Course;
+	string session;
+	gotoXY(55, 5); cout << "HCMUS Portal";
+	gotoXY(52, 7); cout << "Semester Infomation";
+	drawBox(width, height, left, top);
+	hideCursor(false);
+	gotoXY(45, 10); cout << "Course ID: ";
+	gotoXY(45, 11); cout << "Course name:";
+	gotoXY(45, 12); cout << "Teacher name: ";
+	gotoXY(45, 13); cout << "Number of credits: ";
+	gotoXY(45, 14); cout << "Maximum nums of student: ";
+	gotoXY(45, 15); cout << "Day of the week: ";
+	gotoXY(45, 16); cout << "Session (S1,S2,S3,S4): ";
+
+	gotoXY(56, 10); getline(cin, newCourse->id);
+	gotoXY(58, 11); getline(cin, newCourse->courseName);
+	gotoXY(59, 12); getline(cin, newCourse->teacherName);
+	gotoXY(64, 13); cin >> newCourse->credits;
+	gotoXY(70, 14); cin >> newCourse->maxStudents;
+	cin.ignore();
+	gotoXY(62, 15); getline(cin, newCourse->wDay);
+	toUpper(newCourse->wDay);
+	gotoXY(68, 16); getline(cin, session);
+	toUpper(session);
+	newCourse->session[0] = session.substr(session.find('S'), 2);
+	session.erase(session.find('S'), 2);
+	newCourse->session[1]= session.substr(session.find('S'), 2);
+	newCourse->next = NULL;
+	addCourse(listCourses, newCourse);
+	hideCursor(true);
+	saveCourses();
+}
+void viewCourses() {
+	const int width = 40;
+	int height = 10;
+	const int left = 40;
+	const int top = 8;
+	int curPos = 0;
+	int yPos = 9;
+
+	int count;
+	do {
+		system("cls");
+		count = 0;
+		height = 10;
+		Course* temp = listCourses.head;
+		while (temp != NULL) {
+			gotoXY(48, yPos); cout << temp->id << ". " << temp->courseName;
+			yPos++;
+			temp = temp->next;
+			count++;
+			height += count;
+		}
+		drawBox(width, height, left, top);
+		gotoXY(48, yPos); cout << "Back";
+		yPos = 9;
+		gotoXY(76, curPos + yPos); cout << cursor;
+	} while (command(curPos, 0, count, viewCourseOption));
+}
+void updateCourses() {
+
+}
 void manageCourses() {
 	const int width = 40;
 	const int height = 10;
@@ -531,6 +625,7 @@ void manageCourses() {
 	int curPos = 0;
 	int yPos = 9;
 
+	getListCourses();
 	do {
 		system("cls");
 		drawBox(width, height, left, top);
@@ -544,13 +639,24 @@ void manageCourses() {
 			gotoXY(48, yPos); cout << "Semester Infomation";
 			yPos++;
 		}
-		gotoXY(48, yPos); cout << "Create Courses Registration";
+		if (isOnRegSession()) {
+			gotoXY(48, yPos); cout << "Modify Courses Registration";
+			yPos++;
+		}
+		else {
+			gotoXY(48, yPos); cout << "Create Courses Registration";
+			yPos++;
+		}
+		gotoXY(48, yPos); cout << "Add Courses";
+		yPos++;
+		gotoXY(48, yPos); cout << "View List Courses";
+		yPos++;
+		gotoXY(48, yPos); cout << "Update Courses";
 		yPos++;
 		gotoXY(48, yPos); cout << "Back";
-		yPos++;
 		yPos = 9;
 		gotoXY(76, curPos + yPos); cout << cursor;
-	} while (command(curPos, 0, 2, manageCoursesOption));
+	} while (command(curPos, 0, 5, manageCoursesOption));
 }
 
 //Setting
@@ -661,6 +767,15 @@ int manageCoursesOption(int curPos) {
 		createCoursesReg();
 		break;
 	case 2:
+		createCourse();
+		break;
+	case 3:
+		viewCourses();
+		break;
+	case 4:
+		updateCourses();
+		break;
+	case 5:
 		return 0;
 		break;
 	}
