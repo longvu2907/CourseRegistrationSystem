@@ -33,9 +33,9 @@ void readUsersData(ListUser& listUsers) {
 	string  data = "";
 	getline(fin, data);
 	initList(listUsers);
-	while (!fin.eof()) {
+	while (true) {
+		if (fin.eof()) break;
 		addUser(listUsers, convertData(fin));
-		listUsers.size++;
 	}
 }
 
@@ -102,8 +102,7 @@ string getPassword(bool isHidden) {
 				cout << "*";
 			}
 			else cout << ch;
-		}
-		
+		}	
 	}
 }
 
@@ -131,7 +130,6 @@ void loginUI(ListUser listUser) {
 	getline(cin, id);
 	password = getPassword(true);
 	currentUser = login(id, password, listUser);
-	
 }
 
 void loginSystem() {
@@ -147,8 +145,15 @@ void loginSystem() {
 			notifyBox("LOGIN FAIL!");
 		}
 		else {
-			notifyBox("LOGIN SUCCEEDED");
+			notifyBox("LOGIN SUCCESSFUL");
 			break;
 		}
 	}
+	if (currentUser->isStaff) {
+		staffMenu();
+	}
+	else {
+		studentMenu();
+	}
+	system("cls");
 }

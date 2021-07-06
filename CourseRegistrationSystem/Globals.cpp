@@ -6,6 +6,7 @@ string currentSchoolYear;
 Semester currentSemester;
 string semesterPath;
 ListCourses listCourses;
+string schoolYearPath;
 
 int dayofweek(int d, int m, int y)
 {
@@ -176,6 +177,7 @@ void addCourse(ListCourses& list, Course* course) {
 		course->prev = list.tail;
 		list.tail = course;
 	}
+	list.size++;
 }
 void initList(ListUser& list) {
 	list.pHead = NULL;
@@ -296,7 +298,8 @@ void getListCourses() {
 	listCourses.startDate = strToDate(start);
 	listCourses.endDate = strToDate(end);
 	getline(fin, s);
-	while (!fin.eof()) {
+	while (true) {
+		if (fin.eof()) break;
 		addCourse(listCourses, convertData(fin));
 	}
 }

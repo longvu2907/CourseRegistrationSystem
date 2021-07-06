@@ -56,10 +56,10 @@ struct Student {
 struct ListStudent {
 	Student* pHead;
 	Student* pTail;
-	int size;
 	string program;
 	string className;
 	string year;
+	int size;
 };
 struct Semester {
 	int semester;
@@ -80,6 +80,7 @@ struct ListCourses {
 	Course* head;
 	Course* tail;
 	Date startDate, endDate;
+	int size;
 };
 
 Date strToDate(string str);
@@ -118,3 +119,4 @@ extern string currentSchoolYear;
 extern Semester currentSemester;
 extern string semesterPath;
 extern ListCourses listCourses;
+extern string schoolYearPath;
