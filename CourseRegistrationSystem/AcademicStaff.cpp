@@ -452,9 +452,15 @@ int updateCourseCommand(int& curPos, int minPos, int maxPos, Course* course, fun
 		switch (key) {
 		case 72:
 			if (curPos > minPos) curPos--;
+			else {
+				curPos = maxPos;
+			}
 			break;
 		case 80:
 			if (curPos < maxPos) curPos++;
+			else {
+				curPos = minPos;
+			}
 			break;
 		}
 	}
@@ -559,9 +565,9 @@ int updateCourseOption(int curPos, Course* course) {
 	return 0;
 }
 void updateCourse(Course* course) {
-	const int width = 40;
-	const int height = 10;
-	const int left = 40;
+	const int width = 30;
+	const int height = 8;
+	const int left = 45;
 	const int top = 8;
 	int curPos = 0;
 	int yPos = 10;
@@ -571,15 +577,18 @@ void updateCourse(Course* course) {
 		gotoXY(55, 5); cout << "HCMUS Portal";
 		gotoXY(55, 7); cout << "Update Course";
 		drawBox(width, height, left, top);
-		gotoXY(50, yPos); cout << "View";
+		gotoXY(58, yPos); cout << "View";
 		yPos++;
-		gotoXY(50, yPos); cout << "Modify";
+		gotoXY(58, yPos); cout << "Modify";
 		yPos++;
-		gotoXY(50, yPos); cout << "Delete";
+		gotoXY(58, yPos); cout << "Delete";
 		yPos++;
-		gotoXY(50, yPos); cout << "Back";
+		yPos++;
+		gotoXY(58, yPos); cout << "Back";
 		yPos = 10;
-		gotoXY(76, curPos + yPos); cout << cursor;
+		if (curPos == 3) yPos++;
+		gotoXY(70, curPos + yPos); cout << cursor;
+		yPos = 10;
 	} while (updateCourseCommand(curPos, 0, 3, course, updateCourseOption));
 
 	saveCourses();
@@ -632,6 +641,8 @@ void createSemester(){
 	int semester;
 	string startDate, endDate;
 	hideCursor(false);
+	gotoXY(55, 5); cout << "HCMUS Portal";
+	gotoXY(55, 7); cout << "Create Semester";
 	drawBox(width, height, left, top);
 	gotoXY(48, 12); cout << "Semester(1/2/3): "; cin >> semester;
 	gotoXY(48, 13); cout << "Start date: "; cin >> startDate;
@@ -707,6 +718,7 @@ void addCourse() {
 	int xPos = 7;
 
 	system("cls");
+	gotoXY(55, 5); cout << "HCMUS Portal";
 	gotoXY(55, 7); cout << "Add Courses";
 	drawBox(width, height, left, top);
 	int num;
@@ -765,7 +777,7 @@ void addCourse() {
 }
 void viewCourses() {
 	const int width = 40;
-	int height = 10;
+	int height = 5;
 	const int left = 40;
 	const int top = 8;
 	int curPos = 0;
@@ -773,8 +785,9 @@ void viewCourses() {
 
 	do {
 		system("cls");
-		height = 10;
+		height = 5;
 		height += listCourses.size;
+		gotoXY(55, 5); cout << "HCMUS Portal";
 		gotoXY(55, 7); cout << "List Course";
 		drawBox(width, height, left, top);
 		if (listCourses.head != NULL) {
@@ -784,9 +797,12 @@ void viewCourses() {
 				yPos++;
 				temp = temp->next;
 			}
+			yPos++;
 			gotoXY(48, yPos); cout << "Back";
 			yPos = 9;
+			if (curPos == listCourses.size) yPos++;
 			gotoXY(76, curPos + yPos); cout << cursor;
+			yPos = 9;
 		}
 		else {
 			notifyBox("Empty List...");
@@ -828,9 +844,12 @@ void manageCourses() {
 		yPos++;
 		gotoXY(48, yPos); cout << "View List Courses";
 		yPos++;
+		yPos++;
 		gotoXY(48, yPos); cout << "Back";
 		yPos = 9;
+		if (curPos == 4) yPos++;
 		gotoXY(76, curPos + yPos); cout << cursor;
+		yPos = 9;
 	} while (command(curPos, 0, 4, manageCoursesOption));
 }
 
@@ -844,6 +863,8 @@ void setting() {
 
 	string date;
 	hideCursor(false);
+	gotoXY(55, 5); cout << "HCMUS Portal";
+	gotoXY(55, 7); cout << "Create Semester";
 	drawBox(width, height, left, top);
 	gotoXY(45, 11); cout << "Current Date: "; 
 	cout << currentDate.day << '/' << currentDate.month << '/' << currentDate.year;
@@ -866,9 +887,15 @@ int command(int& curPos, int minPos, int maxPos, function<int(int)> option) {
 		switch (key) {
 		case 72:
 			if (curPos > minPos) curPos--;
+			else {
+				curPos = maxPos;
+			}
 			break;
 		case 80:
 			if (curPos < maxPos) curPos++;
+			else {
+				curPos = minPos;
+			}
 			break;
 		}
 	}

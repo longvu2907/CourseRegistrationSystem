@@ -11,7 +11,6 @@ void setting();
 int command(int&, int, int, function<int(int)>);
 int studentOption(int);
 int coursesRegOption(int);
-void registerCourses();
 
 void studentMenu() {
 	const int width = 40;
@@ -43,6 +42,7 @@ void studentMenu() {
 		gotoXY(70, curPos + yPos); cout << cursor;
 	} while (command(curPos, 0, 4, studentOption));
 }
+
 void registerCourses() {
 	const int width = 40;
 	const int height = 10;
@@ -52,7 +52,7 @@ void registerCourses() {
 	int curPos = 0;
 	int yPos = 9;
 	do {
-
+		drawBox(width, height, left, top);
 	} while (true);
 }
 void coursesReg() {
@@ -72,11 +72,11 @@ void coursesReg() {
 		gotoXY(50, yPos - 2); cout << "Courses Registration";
 		gotoXY(48, yPos); cout << "Register Courses";
 		yPos++;
-		gotoXY(48, yPos); cout << "Enrolled Courses";
+		gotoXY(48, yPos); cout << "List Enrolled Courses";
 		yPos++;
 		yPos = 9;
 		gotoXY(70, curPos + yPos); cout << cursor;
-	} while (command(curPos, 0, 4, studentOption));
+	} while (command(curPos, 0, 4, coursesRegOption));
 }
 
 
@@ -84,6 +84,23 @@ int studentOption(int curPos) {
 	switch (curPos) {
 	case 0:
 		userAccount();
+		break;
+	case 1:
+		Profile();
+		break;
+	case 2:
+		coursesReg();
+		break;
+	case 3:
+		setting();
+		break;
+	}
+	return 1;
+}
+int coursesRegOption(int curPos) {
+	switch (curPos) {
+	case 0:
+		registerCourses();
 		break;
 	case 1:
 		Profile();
