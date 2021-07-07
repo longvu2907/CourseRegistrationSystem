@@ -12,6 +12,7 @@ int command(int&, int, int, function<int(int)>);
 int studentOption(int);
 int coursesRegOption(int);
 
+
 void studentMenu() {
 	const int width = 40;
 	const int height = 10;
@@ -19,17 +20,17 @@ void studentMenu() {
 	const int top = 8;
 
 	int curPos = 0;
-	int yPos = 9;
+	int yPos = 10;
 	do {
 		hideCursor(true);
 		schoolYearPath = "./data/" + currentSchoolYear;
 		system("cls");
 		drawBox(width, height, left, top);
-		gotoXY(55, yPos - 4); cout << "HCMUS Portal";
-		gotoXY(40, yPos - 3); cout << currentDate.wDay;
-		gotoXY(40, yPos - 2); cout << dateToStr(currentDate);
-		gotoXY(75, yPos - 3); cout << "Welcome ";
-		gotoXY(75, yPos - 2); cout << currentUser->lastName << " " << currentUser->firstName;
+		gotoXY(55, 5); cout << "HCMUS Portal";
+		gotoXY(40, 6); cout << currentDate.wDay;
+		gotoXY(40, 7); cout << dateToStr(currentDate);
+		gotoXY(75, 6); cout << "Welcome ";
+		gotoXY(75, 7); cout << currentUser->lastName << " " << currentUser->firstName;
 		gotoXY(48, yPos); cout << "User account";
 		yPos++;
 		gotoXY(48, yPos); cout << "Profile";
@@ -38,22 +39,77 @@ void studentMenu() {
 		yPos++;
 		gotoXY(48, yPos); cout << "Setting";
 		yPos++;
-		yPos = 9;
+		yPos++;
+		gotoXY(48, yPos); cout << "Exit";
+		yPos = 10;
+		if (curPos == 4) yPos++;
 		gotoXY(70, curPos + yPos); cout << cursor;
+		yPos = 10;
 	} while (command(curPos, 0, 4, studentOption));
 }
 
+//Courses Registration
+int registerCoursesOption(int curPos) {
+	int count = 0;
+
+	Course* temp = listCourses.head;
+	Course* courseChoosed = NULL;
+	while (temp != NULL) {
+		if (count == curPos) {
+			courseChoosed = temp;
+			break;
+		}
+		count++;
+		temp = temp->next;
+	}
+	if (courseChoosed == NULL) {
+		return 0;
+	}
+	else {
+		return 0;
+	}
+	return 1;
+}
 void registerCourses() {
 	const int width = 40;
-	const int height = 10;
+	int height = 5;
 	const int left = 40;
 	const int top = 8;
-
 	int curPos = 0;
-	int yPos = 9;
+	int yPos = 10;
+
 	do {
-		drawBox(width, height, left, top);
-	} while (true);
+		if (isOnRegSession()) {
+			system("cls");
+			height = 5;
+			height += listCourses.size;
+			gotoXY(55, 5); cout << "HCMUS Portal";
+			gotoXY(53, 7); cout << "Register Courses";
+			drawBox(width, height, left, top);
+			if (listCourses.head != NULL) {
+				Course* temp = listCourses.head;
+				while (temp != NULL) {
+					gotoXY(43, yPos); cout << temp->id << "   " << temp->courseName;
+					yPos++;
+					temp = temp->next;
+				}
+				yPos++;
+				gotoXY(58, yPos); cout << "Back";
+				yPos = 10;
+				if (curPos == listCourses.size) yPos++;
+				gotoXY(78, curPos + yPos); cout << cursor;
+				yPos = 10;
+			}
+			else {
+				notifyBox("Empty List...");
+				return;
+			}
+		}
+		else {
+			notifyBox("Courses registration session has expired from " + dateToStr(listCourses.endDate));
+			return;
+		}
+	} while (command(curPos, 0, listCourses.size, registerCoursesOption));
 }
 void coursesReg() {
 	const int width = 40;
@@ -63,6 +119,7 @@ void coursesReg() {
 
 	int curPos = 0;
 	int yPos = 9;
+	getListCourses();
 	do {
 		hideCursor(true);
 		schoolYearPath = "./data/" + currentSchoolYear;
@@ -75,7 +132,7 @@ void coursesReg() {
 		gotoXY(48, yPos); cout << "List Enrolled Courses";
 		yPos++;
 		yPos = 9;
-		gotoXY(70, curPos + yPos); cout << cursor;
+		gotoXY(73, curPos + yPos); cout << cursor;
 	} while (command(curPos, 0, 4, coursesRegOption));
 }
 
@@ -93,6 +150,9 @@ int studentOption(int curPos) {
 		break;
 	case 3:
 		setting();
+		break;
+	case 4:
+		exit(0);
 		break;
 	}
 	return 1;

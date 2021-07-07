@@ -1,13 +1,12 @@
-Courses registration session:,6/7/2021-10/7/2021
+Courses registration session:,7/7/2021-10/7/2021
 ID,Course name,Teacher name,Number of credits,Max students,Day of week,Session
-121,Ky Thuat Lap Trinh,Nguyen Le Hoang Dung,4,150,FRI,S3-S4
-122,Vi Tich Phan 2B,Nguyen Vu Huy,3,150,WED,S3-S4
-123,Dai So Tuyen Tinh,Le Van Hop,3,150,TUE,S1-S2
-142,TH Vi Tich Phan 2B,Le Van Chanh,1,40,SAT,S1-S2
-176,NM Tri Tue Nhan Tao,Bui Huy Thong,4,150,TUE,S1-S2
-142,Vat Ly Dai Cuong 1,Trinh Hoa Lang,4,100,TUE,S3-S4
-138,TH Dai So Tuyen Tinh,Nguyen Cao Dang,1,40,FRI,S1-S2
-190,Tam Ly Dao Cuong,Nguyen Thu Thao,4,100,FRI,S3-S4
-129,Tu Tuong Ho Chi Minh,Nguyen Cao Thien Bao,2,100,MON,S3-S4
-189,TH Ky Thuat Lap Trinh,Le Tuan Thu,1,40,WED,S3-S4
-125,Phap Luat Dai Cuong,Nguyen Thi Phuong Dy,4,150,THU,S1-S2
+CSC10002,Ky Thuat Lap Trinh,Nguyen Le Hoang Dung,4,150,FRI,S3-S4
+MTH00004,Vi Tich Phan 2B,Nguyen Vu Huy,3,150,WED,S3-S4
+MTH00030,Dai So Tuyen Tinh,Le Van Hop,3,150,TUE,S1-S2
+MTH00082,TH Vi Tich Phan 2B,Le Van Chanh,1,40,SAT,S1-S2
+PHY00001,Vat Ly Dai Cuong 1,Trinh Hoa Lang,4,100,TUE,S3-S4
+MTH00083,TH Dai So Tuyen Tinh,Nguyen Cao Dang,1,40,FRI,S1-S2
+BAA00006,Tam Ly Dao Cuong,Nguyen Thu Thao,4,100,FRI,S3-S4
+BAA00003,Tu Tuong Ho Chi Minh,Nguyen Cao Thien Bao,2,100,MON,S3-S4
+CSC10002,TH Ky Thuat Lap Trinh,Le Tuan Thu,1,40,WED,S3-S4
+BAA00004,Phap Luat Dai Cuong,Nguyen Thi Phuong Dy,4,150,THU,S1-S2

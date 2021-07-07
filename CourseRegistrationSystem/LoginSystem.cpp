@@ -53,7 +53,7 @@ User* login(string id, string password, ListUser list) {
 string getPassword(bool isHidden) {
 	string passwrd = "";
 	while (true) {
-		gotoXY(70, yPos + 2);
+		gotoXY(79, yPos + 2);
 		if (isHidden) cout << char(254);
 		else cout << " ";
 		gotoXY(58 + passwrd.length(), yPos + 2);
@@ -93,7 +93,7 @@ string getPassword(bool isHidden) {
 				passwrd.pop_back();
 			}
 		}
-		else if (passwrd.length() == 10) {
+		else if (passwrd.length() == 13) {
 
 		}
 		else {
@@ -121,9 +121,9 @@ void loginUI(ListUser listUser) {
 	cout << "ID:";
 	gotoXY(48, yPos + 2);
 	cout << "PASSWORD:";
-	gotoXY(70, yPos + 2);
-	cout << char(254);
+	gotoXY(72, yPos + 2);
 	cout << " Hidden";
+	cout << char(254);
 	gotoXY(48, yPos + 3);
 	cout << "(press F1 to show password)";
 	gotoXY(55, yPos);
@@ -138,6 +138,7 @@ void loginSystem() {
 	getCurrentDate();
 	getCurrentSchoolYear();
 	getCurrentSemester();
+
 	while (true) {
 		hideCursor(false);
 		loginUI(listUser);

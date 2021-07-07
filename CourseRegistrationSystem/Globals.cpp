@@ -95,14 +95,30 @@ void notifyBox(string msg) {
 	hideCursor(true);
 	system("cls");
 	int width = 45;
-	int height = 6;
+	int height = 5;
 	int left = 40;
 	int top = 9;
+	int yPos = 11;
+	int msgLength = msg.length();
+	int rowLength = 37;
+	int row = 1;
+	row += (msgLength / rowLength);
 
-	drawBox(width, height, left, top);
 	gotoXY(57, 8); cout << "NOTIFICATION";
-	gotoXY(45, 11); cout << msg;
-	gotoXY(45, 13); cout << "Press any key to continue...";
+
+	for (int i = 0; i < row; i++) {
+		height++;
+		clearLine(yPos + 3);
+		drawBox(width, height, left, top);
+		gotoXY(45, yPos); 
+		for (int j = 0; j < ((rowLength > msgLength) ? msgLength : rowLength); j++) {
+			cout << msg[j + rowLength * i];
+		}
+		msgLength -= rowLength;
+		yPos++;
+	}
+	yPos++;
+	gotoXY(45, yPos); cout << "Press any key to continue...";
 	_getch();
 	system("cls");
 }
@@ -193,6 +209,7 @@ void initList(ListCourses& list) {
 	list.head = NULL;
 	list.tail = NULL;
 	list.startDate = list.endDate = strToDate("0/0/0");
+	list.size = 0;
 }
 void saveListUser() {
 	ofstream fout(userDataPath);
@@ -266,7 +283,7 @@ bool isExpired(Date now, Date endDate) {
 	}
 }
 bool isOnRegSession() {
-	return isExpired(listCourses.startDate, currentDate) && !isExpired(currentDate, listCourses.endDate);
+	return isExpired(currentDate, listCourses.startDate) && !isExpired(currentDate, listCourses.endDate);
 }
 Course* convertData(ifstream& data) {
 	Course* course = new Course;
