@@ -12,6 +12,7 @@
 #include <direct.h>
 #include <io.h>
 #include <filesystem>
+#include <sstream>
 
 #include "AcademicStaff.h"
 #include "Student.h"
@@ -99,6 +100,7 @@ void notifyBox(string msg);
 void addUser(ListUser& list, User* user);
 void addStudent(ListStudent& list, Student* student);
 void addCourse(ListCourses& list, Course* course);
+void deleteCourse(ListCourses& list, Course* course);
 void saveListUser();
 void saveClass(string path, ListStudent listStudent);
 void saveCourses();

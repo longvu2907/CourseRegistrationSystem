@@ -1,6 +1,7 @@
 #include "Student.h"
 
 ListCourses enrolledCourses;
+ListCourses registedCourses;
 const char cursor = char(174);
 
 void userAccount();
@@ -51,9 +52,41 @@ void studentMenu() {
 }
 
 //Courses Registration
+Course* copyCourseData(Course* src) {
+	Course* newCourse = new Course;
+	newCourse->id = src->id;
+	newCourse->courseName = src->courseName;
+	newCourse->teacherName = src->teacherName;
+	newCourse->credits = src->credits;
+	newCourse->maxStudents = src->maxStudents;
+	newCourse->wDay = src->wDay;
+	newCourse->session[0] = src->session[0];
+	newCourse->session[1] = src->session[1];
+	newCourse->next = NULL;
+	return newCourse;
+}
+bool isConflicted(Course* course) {
+	Course* temp = registedCourses.head;
+	while (temp != NULL) {
+		if ((temp->session[0] == course->session[0] || temp->session[1] == course->session[1]
+			|| temp->session[1] == course->session[0] || temp->session[0] == course->session[1])
+			&& temp->wDay == course->wDay)
+			return true;
+		temp = temp->next;
+	}
+	return false;
+}
+Course* isRegisted(Course* course) {
+	Course* temp = registedCourses.head;
+	while (temp != NULL) {
+		if (temp->id == course->id) return temp;
+		temp = temp->next;
+	}
+	return NULL;
+}
 int registerCoursesOption(int curPos) {
 	int count = 0;
-
+	
 	Course* temp = listCourses.head;
 	Course* courseChoosed = NULL;
 	while (temp != NULL) {
@@ -68,7 +101,13 @@ int registerCoursesOption(int curPos) {
 		return 0;
 	}
 	else {
-		return 0;
+		if (isRegisted(courseChoosed) != NULL) deleteCourse(registedCourses, isRegisted(courseChoosed));
+		else if (registedCourses.size >= 5) notifyBox("You can enroll in at most 5 courses in a semester.");
+		else if (isConflicted(courseChoosed)) notifyBox("This course is conflicted with another course in your list of courses registed.");
+		else {
+			addCourse(registedCourses, copyCourseData(courseChoosed));
+		}
+		return 1;
 	}
 	return 1;
 }
@@ -80,6 +119,7 @@ void registerCourses() {
 	int curPos = 0;
 	int yPos = 10;
 
+	initList(registedCourses);
 	do {
 		if (isOnRegSession()) {
 			system("cls");
@@ -92,6 +132,8 @@ void registerCourses() {
 				Course* temp = listCourses.head;
 				while (temp != NULL) {
 					gotoXY(43, yPos); cout << temp->id << "   " << temp->courseName;
+					if (isRegisted(temp) != NULL) cout << " " << char(254);
+
 					yPos++;
 					temp = temp->next;
 				}
@@ -147,7 +189,7 @@ void viewEnrolledCourses() {
 			notifyBox("Empty List...");
 			return;
 		}
-	} while (command(curPos, 0, enrolledCourses.size, registerCoursesOption));
+	} while (command(curPos, 0, enrolledCourses.size, studentOption));
 }
 void coursesReg() {
 	const int width = 40;
@@ -164,7 +206,7 @@ void coursesReg() {
 		system("cls");
 		drawBox(width, height, left, top);
 		gotoXY(55, 5); cout << "HCMUS Portal";
-		gotoXY(50, 7); cout << "Courses Registration";
+		gotoXY(51, 7); cout << "Courses Registration";
 		gotoXY(48, yPos); cout << "Register Courses";
 		yPos++;
 		gotoXY(48, yPos); cout << "View Enrolled Courses";

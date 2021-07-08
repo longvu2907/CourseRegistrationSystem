@@ -255,24 +255,26 @@ void inputClassData() {
 	gotoXY(xPos + 81, yPos); cout << "Social ID";
 	yPos++;
 	while (no <= quantity) {
-		Student* student = new Student;
+		Student* newStudent = new Student;
 		drawBox(width, height, left, top);
 		string dateOfBirth;
 		gotoXY(xPos, yPos); cout << no;
-		gotoXY(xPos + 3, yPos); cout << "| "; getline(cin, student->studentID);
-		gotoXY(xPos + 18, yPos); cout << "| "; getline(cin, student->lastName);
-		gotoXY(xPos + 38, yPos); cout << "| "; getline(cin, student->firstName);
-		gotoXY(xPos + 53, yPos); cout << "| "; getline(cin, student->gender);
+		gotoXY(xPos + 3, yPos); cout << "| "; getline(cin, newStudent->studentID);
+		gotoXY(xPos + 18, yPos); cout << "| "; getline(cin, newStudent->lastName);
+		gotoXY(xPos + 38, yPos); cout << "| "; getline(cin, newStudent->firstName);
+		gotoXY(xPos + 53, yPos); cout << "| "; getline(cin, newStudent->gender);
 		gotoXY(xPos + 63, yPos); cout << "| "; getline(cin, dateOfBirth);
-		student->dateOfBirth = strToDate(dateOfBirth);
-		gotoXY(xPos + 79, yPos); cout << "| "; getline(cin, student->socialID);
-		student->prev = NULL;
-		student->next = NULL;
+		newStudent->dateOfBirth = strToDate(dateOfBirth);
+		gotoXY(xPos + 79, yPos); cout << "| "; getline(cin, newStudent->socialID);
+		newStudent->prev = NULL;
+		newStudent->next = NULL;
 		no++;
 		yPos++;
 		height++;
 		clearLine(yPos);
-		addStudent(listStudent, student);
+		addStudent(listStudent, newStudent);
+		ofstream("./data/" + currentSchoolYear + "/semester " +
+			to_string(currentSemester.semester) + "/student/" + newStudent->studentID + ".dat");
 		drawBox(width, height, left, top);
 	}
 	hideCursor(true);
@@ -290,22 +292,22 @@ void importClassData() {
 	int no = 1;
 	int yPos = 2;
 	int xPos = 17;
-	int width = 40;
+	int width = 50;
 	int height = 8;
-	int left = 40;
+	int left = 35;
 	int top = 9;
-	string dir = "./data/files imported/";
+	string dir = "./data/importFiles/";
 
 	string temp;
 	gotoXY(55, 5); cout << "HCMUS Portal";
-	gotoXY(53, 7); cout << "Import Class Data";
+	gotoXY(52, 7); cout << "Import Class Data";
 	drawBox(width, height, left, top);
-	gotoXY(48, 12); cout << "(APCS/CLC/CTT/VP)";
-	gotoXY(48, 11); cout << "Curriculum program: "; getline(cin, listStudent.program);
-	gotoXY(48, 13); cout << "Year(1/2/3/4): "; cin >> year;
+	gotoXY(38, 12); cout << "(APCS/CLC/CTT/VP)";
+	gotoXY(38, 11); cout << "Curriculum program: "; getline(cin, listStudent.program);
+	gotoXY(38, 13); cout << "Year(1/2/3/4): "; cin >> year;
 	cin.ignore();
-	gotoXY(48, 14); cout << "Class: "; getline(cin, listStudent.className);
-	gotoXY(48, 15); cout << "Dir: Files Imported/"; getline(cin, temp);
+	gotoXY(38, 14); cout << "Class: "; getline(cin, listStudent.className);
+	gotoXY(38, 10); cout << "Dir: " + dir; getline(cin, temp);
 
 	listStudent.year = studentYear(year);
 	if (temp.find(".csv") == string::npos) {
@@ -319,8 +321,12 @@ void importClassData() {
 	}
 	string s = "";
 	getline(fin, s);
-	while (!fin.eof()) {
-		addStudent(listStudent, convertStudentData(fin));
+	while (true) {
+		Student* newStudent = convertStudentData(fin);
+		if (fin.eof()) break;
+		addStudent(listStudent, newStudent);
+		ofstream("./data/" + currentSchoolYear + "/semester " +
+			to_string(currentSemester.semester) + "/student/" + newStudent->studentID + ".dat");
 	}
 	hideCursor(true);
 	saveListStudent(listStudent);
@@ -501,6 +507,7 @@ void modifyCourse(Course* course) {
 
 	system("cls");
 	string session;
+	string id = course->id;
 	gotoXY(55, 5); cout << "HCMUS Portal";
 	gotoXY(55, 7); cout << "Modify Course";
 	drawBox(width, height, left, top);
@@ -519,7 +526,7 @@ void modifyCourse(Course* course) {
 	gotoXY(64, 13); cin >> course->credits;
 	gotoXY(70, 14); cin >> course->maxStudents;
 	cin.ignore();
-	gotoXY(62, 15); getline(cin, course->wDay);
+	gotoXY(44, 15); getline(cin, course->wDay);
 	toUpper(course->wDay);
 	gotoXY(68, 16); getline(cin, session);
 	toUpper(session);
@@ -527,28 +534,16 @@ void modifyCourse(Course* course) {
 	session.erase(session.find('S'), 2);
 	course->session[1] = session.substr(session.find('S'), 2);
 	hideCursor(true);
+	fs::rename(schoolYearPath + "/semester " + to_string(currentSemester.semester) 
+		+ "/courses/" + id + ".dat",
+		schoolYearPath + "/semester " + to_string(currentSemester.semester) 
+		+ "/courses/" + course->id + ".dat");
 	saveCourses();
 }
 void deleteCourse(Course* course) {
-	if (course == listCourses.head && course == listCourses.tail) {
-		listCourses.head = listCourses.tail = NULL;
-		delete course;
-	}
-	else if (course == listCourses.head) {
-		listCourses.head = listCourses.head->next;
-		listCourses.head->prev = NULL;
-		delete course;
-	}
-	else if (course == listCourses.tail) {
-		listCourses.tail = listCourses.tail->prev;
-		listCourses.tail->next = NULL;
-		delete course;
-	}
-	else {
-		course->prev->next = course->next;
-		delete course;
-	}
-	listCourses.size--;
+	fs::remove("./data/" + currentSchoolYear + "/semester " +
+		to_string(currentSemester.semester) + "/courses/" + course->id + ".dat");
+	deleteCourse(listCourses, course);
 }
 int updateCourseOption(int curPos, Course* course) {
 	switch (curPos)
@@ -794,6 +789,8 @@ void inputCoursesData() {
 		height++;
 		clearLine(yPos);
 		addCourse(listCourses, newCourse);
+		ofstream("./data/" + currentSchoolYear + "/semester " +
+			to_string(currentSemester.semester) + "/courses/" + newCourse->id + ".dat");
 		drawBox(width, height, left, top);
 	}
 	hideCursor(true);
@@ -810,15 +807,17 @@ void importCoursesData() {
 	int no = 1;
 	int yPos = 2;
 	int xPos = 17;
-	int width = 40;
-	int height = 8;
-	int left = 40;
-	int top = 9;
-	string dir = "./data/files imported/";
+	int width = 50;
+	int height = 4;
+	int left = 35;
+	int top = 8;
+	string dir = "./data/importFiles/";
 
 	string temp;
+	gotoXY(55, 5); cout << "HCMUS Portal";
+	gotoXY(51, 7); cout << "Import Courses Data";
 	drawBox(width, height, left, top);
-	gotoXY(48, 15); cout << "Dir: Files Imported/"; getline(cin, temp);
+	gotoXY(38, 10); cout << "Dir: " + dir; getline(cin, temp);
 
 	if (temp.find(".csv") == string::npos) {
 		temp += ".csv";
@@ -831,8 +830,12 @@ void importCoursesData() {
 	}
 	string s = "";
 	getline(fin, s);
-	while (!fin.eof()) {
-		addCourse(listCourses, convertCourseData(fin));
+	while (true) {
+		Course* newCourse = convertCourseData(fin);
+		if (fin.eof()) break;
+		addCourse(listCourses, newCourse);
+		ofstream("./data/" + currentSchoolYear + "/semester " +
+			to_string(currentSemester.semester) + "/courses/" + newCourse->id + ".dat");
 	}
 	hideCursor(true);
 	saveCourses();

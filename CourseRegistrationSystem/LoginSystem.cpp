@@ -9,19 +9,19 @@ ListUser listUser;
 int yPos = 13;
 
 
-void getListUsers(ListUser& listUsers) {
+void getListUsers() {
 	ifstream fin(userDataPath);
 	string  data = "";
 	getline(fin, data);
-	initList(listUsers);
+	initList(listUser);
 	while (true) {
 		if (fin.eof()) break;
-		addUser(listUsers, convertUserData(fin));
+		addUser(listUser, convertUserData(fin));
 	}
 }
 
-User* login(string id, string password, ListUser list) {
-	User* data = list.pHead;
+User* login(string id, string password) {
+	User* data = listUser.pHead;
 	while (data != NULL) {
 		if (id == data->id) {
 			if (password == data->password) return data;
@@ -87,7 +87,7 @@ string getPassword(bool isHidden) {
 	}
 }
 
-void loginUI(ListUser listUser) {
+void loginUI() {
 	const int width = 40;
 	const int height = 10;
 	const int left = 40;
@@ -110,24 +110,24 @@ void loginUI(ListUser listUser) {
 	gotoXY(55, yPos);
 	getline(cin, id);
 	password = getPassword(true);
-	currentUser = login(id, password, listUser);
+	currentUser = login(id, password);
 }
 
 void loginSystem() {
 	system("cls");
-	getListUsers(listUser);
+	getListUsers();
 	getCurrentDate();
 	getCurrentSchoolYear();
 	getCurrentSemester();
 
 	while (true) {
 		hideCursor(false);
-		loginUI(listUser);
+		loginUI();
 		if (currentUser == NULL) {
-			notifyBox("LOGIN FAIL!");
+			notifyBox("Login Fail");
 		}
 		else {
-			notifyBox("LOGIN SUCCESSFUL");
+			notifyBox("Login Succesful");
 			break;
 		}
 	}

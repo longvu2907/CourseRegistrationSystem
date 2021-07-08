@@ -92,6 +92,14 @@ void clearLine(int y) {
 }
 
 void notifyBox(string msg) {
+	int n = count(msg.begin(), msg.end(), ' ') + 1;
+	string* strArr = new string[n];
+	int i = 0;
+	stringstream ssin(msg);
+	while (ssin.good() && i < n) {
+		ssin >> strArr[i];
+		i++;
+	}
 	hideCursor(true);
 	system("cls");
 	int width = 45;
@@ -99,22 +107,21 @@ void notifyBox(string msg) {
 	int left = 40;
 	int top = 9;
 	int yPos = 11;
-	int msgLength = msg.length();
-	int rowLength = 37;
-	int row = 1;
-	row += (msgLength / rowLength);
 
 	gotoXY(57, 8); cout << "NOTIFICATION";
-
-	for (int i = 0; i < row; i++) {
+	i = 0;
+	while (i < n) {
 		height++;
 		clearLine(yPos + 3);
 		drawBox(width, height, left, top);
-		gotoXY(45, yPos); 
-		for (int j = 0; j < ((rowLength > msgLength) ? msgLength : rowLength); j++) {
-			cout << msg[j + rowLength * i];
+		int rowLength = 37;
+		gotoXY(45, yPos);
+		while (rowLength > 0 || i < n) {
+			cout << strArr[i] << " ";
+			rowLength -= (strArr[i].length() + 1);
+			i++;
+			if (rowLength < (strArr[i].length() + 1)) break;
 		}
-		msgLength -= rowLength;
 		yPos++;
 	}
 	yPos++;
@@ -187,15 +194,36 @@ void addCourse(ListCourses& list, Course* course) {
 	if (course == NULL) return;
 	if (list.head == NULL) {
 		list.head = list.tail = course;
+		course->prev = NULL;
 	}
 	else {
 		list.tail->next = course;
 		course->prev = list.tail;
 		list.tail = course;
 	}
-	ofstream("./data/" + currentSchoolYear + "/semester " +
-		to_string(currentSemester.semester) + "/courses/" + course->id + ".dat");
 	list.size++;
+}
+void deleteCourse(ListCourses& list, Course* course) {
+	if (course == list.head && course == list.tail) {
+		list.head = list.tail = NULL;
+		delete course;
+	}
+	else if (course == list.head) {
+		list.head = list.head->next;
+		list.head->prev = NULL;
+		delete course;
+	}
+	else if (course == list.tail) {
+		list.tail = list.tail->prev;
+		list.tail->next = NULL;
+		delete course;
+	}
+	else {
+		course->prev->next = course->next;
+		course->next->prev = course->prev;
+		delete course;
+	}
+	list.size--;
 }
 void initList(ListUser& list) {
 	list.pHead = NULL;
