@@ -214,7 +214,7 @@ void initList(ListCourses& list) {
 	list.size = 0;
 }
 void saveListUser() {
-	ofstream fout(userDataPath, ios::binary);
+	ofstream fout(userDataPath);
 	fout << "ID,Password,Last name,First name,Class,Gender,Date of Birth,Staff" << endl;
 	User* curr = listUser.pHead;
 	while (curr != NULL) {
