@@ -1,6 +1,6 @@
 #include "Student.h"
 
-
+ListCourses enrolledCourses;
 const char cursor = char(174);
 
 void userAccount();
@@ -8,6 +8,8 @@ void Profile();
 void coursesReg();
 void setting();
 
+void saveEnrolledCourses();
+void getEnrolledCourses();
 int command(int&, int, int, function<int(int)>);
 int studentOption(int);
 int coursesRegOption(int);
@@ -111,6 +113,42 @@ void registerCourses() {
 		}
 	} while (command(curPos, 0, listCourses.size, registerCoursesOption));
 }
+void viewEnrolledCourses() {
+	const int width = 40;
+	int height = 5;
+	const int left = 40;
+	const int top = 8;
+	int curPos = 0;
+	int yPos = 10;
+	
+	getEnrolledCourses();
+	do {
+		system("cls");
+		height = 5;
+		height += enrolledCourses.size;
+		gotoXY(55, 5); cout << "HCMUS Portal";
+		gotoXY(53, 7); cout << "Register Courses";
+		drawBox(width, height, left, top);
+		if (enrolledCourses.head != NULL) {
+			Course* temp = enrolledCourses.head;
+			while (temp != NULL) {
+				gotoXY(43, yPos); cout << temp->id << "   " << temp->courseName;
+				yPos++;
+				temp = temp->next;
+			}
+			yPos++;
+			gotoXY(58, yPos); cout << "Back";
+			yPos = 10;
+			if (curPos == enrolledCourses.size) yPos++;
+			gotoXY(78, curPos + yPos); cout << cursor;
+			yPos = 10;
+		}
+		else {
+			notifyBox("Empty List...");
+			return;
+		}
+	} while (command(curPos, 0, enrolledCourses.size, registerCoursesOption));
+}
 void coursesReg() {
 	const int width = 40;
 	const int height = 10;
@@ -118,22 +156,26 @@ void coursesReg() {
 	const int top = 8;
 
 	int curPos = 0;
-	int yPos = 9;
+	int yPos = 10;
 	getListCourses();
 	do {
 		hideCursor(true);
 		schoolYearPath = "./data/" + currentSchoolYear;
 		system("cls");
 		drawBox(width, height, left, top);
-		gotoXY(55, yPos - 4); cout << "HCMUS Portal";
-		gotoXY(50, yPos - 2); cout << "Courses Registration";
+		gotoXY(55, 5); cout << "HCMUS Portal";
+		gotoXY(50, 7); cout << "Courses Registration";
 		gotoXY(48, yPos); cout << "Register Courses";
 		yPos++;
-		gotoXY(48, yPos); cout << "List Enrolled Courses";
+		gotoXY(48, yPos); cout << "View Enrolled Courses";
 		yPos++;
-		yPos = 9;
+		yPos++;
+		gotoXY(48, yPos); cout << "Back";
+		yPos = 10;
+		if (curPos == 2) yPos++;
 		gotoXY(73, curPos + yPos); cout << cursor;
-	} while (command(curPos, 0, 4, coursesRegOption));
+		yPos = 10;
+	} while (command(curPos, 0, 2, coursesRegOption));
 }
 
 
@@ -163,14 +205,28 @@ int coursesRegOption(int curPos) {
 		registerCourses();
 		break;
 	case 1:
-		Profile();
+		viewEnrolledCourses();
 		break;
 	case 2:
-		coursesReg();
+		return 0;
 		break;
 	case 3:
 		setting();
 		break;
 	}
 	return 1;
+}
+
+void saveEnrolledCourses() {
+	ofstream fout(semesterPath + "/student/" + currentUser->id + ".dat", ios::binary);
+	Course* temp = enrolledCourses.head;
+	while (temp != NULL) {
+		Course data = *temp;
+		fout.write((char*)&data, sizeof(Course));
+	}
+	fout.close();
+}
+void getEnrolledCourses() {
+	initList(enrolledCourses);
+	saveEnrolledCourses();
 }

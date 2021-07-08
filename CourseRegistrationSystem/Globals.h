@@ -103,8 +103,12 @@ void saveListUser();
 void saveClass(string path, ListStudent listStudent);
 void saveCourses();
 
+User* convertUserData(ifstream& data);
+Student* convertStudentData(ifstream& data);
+Course* convertCourseData(ifstream& data);
 void initList(ListUser& list);
 void initList(ListStudent& list);
+void initList(ListCourses& list);
 bool isExpired(Date currentDate, Date endDate);
 bool isOnRegSession();
 void getListCourses();

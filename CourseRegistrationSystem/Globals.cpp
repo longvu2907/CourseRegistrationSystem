@@ -193,6 +193,8 @@ void addCourse(ListCourses& list, Course* course) {
 		course->prev = list.tail;
 		list.tail = course;
 	}
+	ofstream("./data/" + currentSchoolYear + "/semester " +
+		to_string(currentSemester.semester) + "/courses/" + course->id + ".dat");
 	list.size++;
 }
 void initList(ListUser& list) {
@@ -212,7 +214,7 @@ void initList(ListCourses& list) {
 	list.size = 0;
 }
 void saveListUser() {
-	ofstream fout(userDataPath);
+	ofstream fout(userDataPath, ios::binary);
 	fout << "ID,Password,Last name,First name,Class,Gender,Date of Birth,Staff" << endl;
 	User* curr = listUser.pHead;
 	while (curr != NULL) {
@@ -244,7 +246,7 @@ void saveCourses() {
 	ofstream fout(semesterPath + "/courses.csv");
 	fout << "Courses registration session:," << dateToStr(listCourses.startDate) << "-"
 		<< dateToStr(listCourses.endDate) << endl;
-	fout << "ID,Course name,Teacher name,Number of credits,Max students,Day of week,Session" << endl;
+	fout << "ID,Course name,Teacher name,Number of credits,Max students,Day of the week,Session" << endl;
 	Course* temp = listCourses.head;
 	while (temp != NULL) {
 		toUpper(temp->wDay);
@@ -256,6 +258,61 @@ void saveCourses() {
 	fout.close();
 }
 
+User* convertUserData(ifstream& data) {
+	User* usersData = new User;
+	Date dateOfBirth;
+	string temp;
+	getline(data, usersData->id, ',');
+	if (usersData->id == "") return NULL;
+	getline(data, usersData->password, ',');
+	getline(data, usersData->lastName, ',');
+	getline(data, usersData->firstName, ',');
+	getline(data, usersData->className, ',');
+	getline(data, usersData->gender, ',');
+	getline(data, temp, ',');
+	usersData->dateOfBirth = strToDate(temp);
+	getline(data, temp, '\n');
+	if (temp == "TRUE") usersData->isStaff = true;
+	else usersData->isStaff = false;
+	usersData->next = NULL;
+	usersData->prev = NULL;
+	return usersData;
+}
+Student* convertStudentData(ifstream& data) {
+	Student* newStudent = new Student;
+	string s, dateOfBirth;
+	getline(data, s, ',');
+	if (s == "") return NULL;
+	getline(data, newStudent->studentID, ',');
+	getline(data, newStudent->lastName, ',');
+	getline(data, newStudent->firstName, ',');
+	getline(data, newStudent->gender, ',');
+	getline(data, dateOfBirth, ',');
+	newStudent->dateOfBirth = strToDate(dateOfBirth);
+	getline(data, newStudent->socialID, '\n');
+	newStudent->next = NULL;
+	newStudent->prev = NULL;
+	return newStudent;
+}
+Course* convertCourseData(ifstream& data) {
+	Course* course = new Course;
+	string credits, maxStudents, session;
+	getline(data, course->id, ',');
+	if (course->id == "") return NULL;
+	getline(data, course->courseName, ',');
+	getline(data, course->teacherName, ',');
+	getline(data, credits, ',');
+	course->credits = stoi(credits);
+	getline(data, maxStudents, ',');
+	course->maxStudents = stoi(maxStudents);
+	getline(data, course->wDay, ',');
+	getline(data, session, '\n');
+	course->session[0] = session.substr(session.find('S'), 2);
+	session.erase(session.find('S'), 2);
+	course->session[1] = session.substr(session.find('S'), 2);
+	course->next = NULL;
+	return course;
+}
 const string currentDateTime() {
 	time_t now = time(0);
 	tm ltm;
@@ -285,28 +342,10 @@ bool isExpired(Date now, Date endDate) {
 bool isOnRegSession() {
 	return isExpired(currentDate, listCourses.startDate) && !isExpired(currentDate, listCourses.endDate);
 }
-Course* convertData(ifstream& data) {
-	Course* course = new Course;
-	string credits, maxStudents, session;
-	getline(data, course->id, ',');
-	if (course->id == "") return NULL;
-	getline(data, course->courseName, ',');
-	getline(data, course->teacherName, ',');
-	getline(data, credits, ',');
-	course->credits = stoi(credits);
-	getline(data, maxStudents, ',');
-	course->maxStudents = stoi(maxStudents);
-	getline(data, course->wDay, ',');
-	getline(data, session, '\n');
-	course->session[0] = session.substr(session.find('S'), 2);
-	session.erase(session.find('S'), 2);
-	course->session[1] = session.substr(session.find('S'), 2);
-	course->next = NULL;
-	return course;
-}
 void getListCourses() {
 	ifstream fin(semesterPath + "/courses.csv");
 	initList(listCourses);
+	if (!fin) return;
 	string s;
 	string start, end;
 	getline(fin, s);
@@ -317,7 +356,7 @@ void getListCourses() {
 	getline(fin, s);
 	while (true) {
 		if (fin.eof()) break;
-		addCourse(listCourses, convertData(fin));
+		addCourse(listCourses, convertCourseData(fin));
 	}
 }
 void getCurrentDate() {
@@ -363,7 +402,7 @@ void getCurrentSchoolYear() {
 	}
 }
 void getCurrentSemester() {
-	ifstream fin("data/" + currentSchoolYear + "/semester.txt");
+	ifstream fin("data/" + currentSchoolYear + "/semester.dat");
 	if (!fin) return;
 	fin >> currentSemester.semester;
 	string startDate, endDate, s;

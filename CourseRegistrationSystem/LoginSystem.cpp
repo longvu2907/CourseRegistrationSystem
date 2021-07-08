@@ -8,34 +8,15 @@ User* currentUser = NULL;
 ListUser listUser;
 int yPos = 13;
 
-User* convertData(ifstream& data) {
-	User* usersData = new User;
-	Date dateOfBirth;
-	string temp;
-	getline(data,usersData->id,',');
-	if (usersData->id == "") return NULL;
-	getline(data, usersData->password, ',');
-	getline(data, usersData->lastName, ',');
-	getline(data, usersData->firstName, ',');
-	getline(data, usersData->className, ',');
-	getline(data, usersData->gender, ',');
-	getline(data, temp, ',');
-	usersData->dateOfBirth = strToDate(temp);
-	getline(data, temp, '\n');
-	if (temp == "TRUE") usersData->isStaff = true;
-	else usersData->isStaff = false;
-	usersData->next = NULL;
-	usersData->prev = NULL;
-	return usersData;
-}
-void readUsersData(ListUser& listUsers) {
+
+void getListUsers(ListUser& listUsers) {
 	ifstream fin(userDataPath);
 	string  data = "";
 	getline(fin, data);
 	initList(listUsers);
 	while (true) {
 		if (fin.eof()) break;
-		addUser(listUsers, convertData(fin));
+		addUser(listUsers, convertUserData(fin));
 	}
 }
 
@@ -134,7 +115,7 @@ void loginUI(ListUser listUser) {
 
 void loginSystem() {
 	system("cls");
-	readUsersData(listUser);
+	getListUsers(listUser);
 	getCurrentDate();
 	getCurrentSchoolYear();
 	getCurrentSemester();
