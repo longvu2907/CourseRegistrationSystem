@@ -52,7 +52,13 @@ Date strToDate(string str) {
 	return date;
 }
 string dateToStr(Date date) {
-	return to_string(date.day) + "/" + to_string(date.month) + "/" + to_string(date.year);
+	string str = "";
+	if (date.day < 10) str += "0";
+	str += to_string(date.day) + "/";
+	if (date.month < 10) str += "0";
+	str += to_string(date.month) + "/";
+	str += to_string(date.year);
+	return str;
 }
 void gotoXY(int x, int y) {
 	COORD coord;
@@ -91,15 +97,28 @@ void clearLine(int y) {
 	printf("%c[2K", 27);
 }
 
-void notifyBox(string msg) {
-	int n = count(msg.begin(), msg.end(), ' ') + 1;
+void alignRow(int x, int& y, string text, int rowLength) {
+	int n = count(text.begin(), text.end(), ' ') + 1;
 	string* strArr = new string[n];
 	int i = 0;
-	stringstream ssin(msg);
+	stringstream ssin(text);
 	while (ssin.good() && i < n) {
 		ssin >> strArr[i];
 		i++;
 	}
+	i = 0;
+	while (i < n) {		
+		gotoXY(x, y);
+		while (rowLength > 0 || i < n) {
+			cout << strArr[i] << " ";
+			rowLength -= (strArr[i].length() + 1);
+			i++;
+			if (rowLength < (strArr[i].length() + 1)) break;
+		}
+		y++;
+	}
+}
+void notifyBox(string msg) {
 	hideCursor(true);
 	system("cls");
 	int width = 45;
@@ -107,23 +126,10 @@ void notifyBox(string msg) {
 	int left = 40;
 	int top = 9;
 	int yPos = 11;
-
 	gotoXY(57, 8); cout << "NOTIFICATION";
-	i = 0;
-	while (i < n) {
-		height++;
-		clearLine(yPos + 3);
-		drawBox(width, height, left, top);
-		int rowLength = 37;
-		gotoXY(45, yPos);
-		while (rowLength > 0 || i < n) {
-			cout << strArr[i] << " ";
-			rowLength -= (strArr[i].length() + 1);
-			i++;
-			if (rowLength < (strArr[i].length() + 1)) break;
-		}
-		yPos++;
-	}
+	alignRow(45, yPos, msg, 37);
+	height += (yPos - 11);
+	drawBox(width, height, left, top);
 	yPos++;
 	gotoXY(45, yPos); cout << "Press any key to continue...";
 	_getch();
@@ -274,13 +280,13 @@ void saveCourses() {
 	ofstream fout(semesterPath + "/courses.csv");
 	fout << "Courses registration session:," << dateToStr(listCourses.startDate) << "-"
 		<< dateToStr(listCourses.endDate) << endl;
-	fout << "ID,Course name,Teacher name,Number of credits,Max students,Day of the week,Session" << endl;
+	fout << "ID,Course name,Teacher name,Credits,Academic year,Number of students,Day of the week,Session" << endl;
 	Course* temp = listCourses.head;
 	while (temp != NULL) {
 		toUpper(temp->wDay);
 		string session = temp->session[0] + "-" + temp->session[1];
 		fout << temp->id << "," << temp->courseName << "," << temp->teacherName << ","
-			<< temp->credits << "," << temp->maxStudents << "," << temp->wDay << "," << session << endl;
+			<< temp->credits << "," << temp->academicYear << "," << temp->maxStudents << "," << temp->wDay << "," << session << endl;
 		temp = temp->next;
 	}
 	fout.close();
@@ -324,13 +330,15 @@ Student* convertStudentData(ifstream& data) {
 }
 Course* convertCourseData(ifstream& data) {
 	Course* course = new Course;
-	string credits, maxStudents, session;
+	string credits, maxStudents, session, academicYear;
 	getline(data, course->id, ',');
 	if (course->id == "") return NULL;
 	getline(data, course->courseName, ',');
 	getline(data, course->teacherName, ',');
 	getline(data, credits, ',');
 	course->credits = stoi(credits);
+	getline(data, academicYear, ',');
+	course->academicYear = stoi(academicYear);
 	getline(data, maxStudents, ',');
 	course->maxStudents = stoi(maxStudents);
 	getline(data, course->wDay, ',');

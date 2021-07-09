@@ -51,6 +51,7 @@ struct Student {
 	string gender;
 	string socialID;
 	Date dateOfBirth;
+	int academicYear;
 	Student* prev;
 	Student* next;
 };
@@ -60,6 +61,7 @@ struct ListStudent {
 	string program;
 	string className;
 	string year;
+	int academicYear;
 	int size;
 };
 struct Semester {
@@ -72,6 +74,8 @@ struct Course {
 	string teacherName;
 	int credits;
 	int maxStudents = 50;
+	int currentStudents;
+	int academicYear;
 	string wDay;
 	string session[2];
 	Course* prev;
@@ -96,6 +100,7 @@ void copyFolder(string from, string to);
 void drawBox(int width, int height, int left, int top);
 void loading(string text);
 void notifyBox(string msg);
+void alignRow(int x, int& y, string text, int rowLength);
 
 void addUser(ListUser& list, User* user);
 void addStudent(ListStudent& list, Student* student);
