@@ -107,8 +107,10 @@ void alignRow(int x, int& y, string text, int rowLength) {
 		i++;
 	}
 	i = 0;
+	int s = rowLength;
 	while (i < n) {		
 		gotoXY(x, y);
+		rowLength = s;
 		while (rowLength > 0 || i < n) {
 			cout << strArr[i] << " ";
 			rowLength -= (strArr[i].length() + 1);

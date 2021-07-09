@@ -74,7 +74,7 @@ struct Course {
 	string teacherName;
 	int credits;
 	int maxStudents = 50;
-	int currentStudents;
+	int numberRegistered = 0;
 	int academicYear;
 	string wDay;
 	string session[2];
