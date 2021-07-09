@@ -256,7 +256,7 @@ void saveListUser() {
 	while (curr != NULL) {
 		string dateOfBirth = to_string(curr->dateOfBirth.day) + "/" + to_string(curr->dateOfBirth.month) + "/" + to_string(curr->dateOfBirth.year);
 		fout << curr->id << "," << curr->password << "," << curr->lastName << "," << curr->firstName
-			<< "," << curr->className << "," << curr->gender << "," << dateOfBirth << ",";
+			<< "," << curr->className << "," << curr->gender << ","  << dateOfBirth << "," << to_string(curr->academicYear) << ",";
 		if (curr->isStaff) fout << "TRUE" << endl;
 		else fout << "FALSE" << endl;
 		curr = curr->next;
@@ -295,24 +295,26 @@ void saveCourses() {
 }
 
 User* convertUserData(ifstream& data) {
-	User* usersData = new User;
+	User* userData = new User;
 	Date dateOfBirth;
 	string temp;
-	getline(data, usersData->id, ',');
-	if (usersData->id == "") return NULL;
-	getline(data, usersData->password, ',');
-	getline(data, usersData->lastName, ',');
-	getline(data, usersData->firstName, ',');
-	getline(data, usersData->className, ',');
-	getline(data, usersData->gender, ',');
+	getline(data, userData->id, ',');
+	if (userData->id == "") return NULL;
+	getline(data, userData->password, ',');
+	getline(data, userData->lastName, ',');
+	getline(data, userData->firstName, ',');
+	getline(data, userData->className, ',');
+	getline(data, userData->gender, ',');
 	getline(data, temp, ',');
-	usersData->dateOfBirth = strToDate(temp);
+	userData->dateOfBirth = strToDate(temp);
+	getline(data, temp, ',');
+	userData->academicYear = stoi(temp);
 	getline(data, temp, '\n');
-	if (temp == "TRUE") usersData->isStaff = true;
-	else usersData->isStaff = false;
-	usersData->next = NULL;
-	usersData->prev = NULL;
-	return usersData;
+	if (temp == "TRUE") userData->isStaff = true;
+	else userData->isStaff = false;
+	userData->next = NULL;
+	userData->prev = NULL;
+	return userData;
 }
 Student* convertStudentData(ifstream& data) {
 	Student* newStudent = new Student;

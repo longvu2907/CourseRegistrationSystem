@@ -34,6 +34,7 @@ struct User {
 	string firstName;
 	string className;
 	string gender;
+	int academicYear;
 	bool isStaff;
 	Date dateOfBirth;
 	User* prev;

@@ -605,24 +605,27 @@ void updateCourse(Course* course) {
 
 	saveCourses();
 }
-int viewCourseOption(int curPos) {
+int viewCourseOption(int curPos, int page) {
 	int count = 0;
-
+	
 	Course* temp = listCourses.head;
-	Course* courseChoosed = NULL;
-	while (temp != NULL) {
-		if (count == curPos) {
-			courseChoosed = temp;
+	for (int i = 0; i < (page - 1) * 10; i++) {
+		temp = temp->next;
+	}
+	Course* courseSelected = NULL;
+	while (count < 10 && temp != NULL) {
+		if (count == curPos ) {
+			courseSelected = temp;
 			break;
 		}
 		count++;
 		temp = temp->next;
 	}
-	if (courseChoosed == NULL) {
+	if (courseSelected == NULL) {
 		return 0;
 	}
 	else {
-		updateCourse(courseChoosed);
+		updateCourse(courseSelected);
 	}
 	return 1;
 }
@@ -912,16 +915,55 @@ void addCourses() {
 
 	} while (command(curPos, 0, 2, addCoursesOption));
 }
+int viewCoursesCommand(int& curPos, int minPos, int maxPos, int& page, int numberPages, function<int(int, int)> option) {
+	int key = _getch();
+	switch (key) {
+	case 13:
+		return option(curPos, page);
+	case 224:
+		key = _getch();
+		switch (key) {
+		case 72://up key
+			if (curPos > minPos) curPos--;
+			else {
+				curPos = maxPos;
+			}
+			break;
+		case 80://down key
+			if (curPos < maxPos) curPos++;
+			else {
+				curPos = minPos;
+			}
+			break;
+		case 75://left key
+			if (page > 1) {
+				page--;
+				curPos = 0;
+			}
+			break;
+		case 77://right key
+			if (page < numberPages) {
+				page++;
+				curPos = 0;
+			}
+			break;
+		}
+	}
+	return 1;
+}
 void viewCourses() {
 	const int width = 50;
 	int height = 7;
 	const int left = 35;
 	const int top = 8;
 	int curPos = 0;
-	int yPos = 12;
+	int yPos = 13;
+	int numberPages = (listCourses.size / 10) + 1;
+	int page = 1;
+	int i = 0;
 
 	do {
-		hideCursor(true);
+		i = 0;
 		system("cls");
 		height = 7;
 		height += listCourses.size;
@@ -934,27 +976,36 @@ void viewCourses() {
 		drawBox(width, height, left, top);
 		if (listCourses.head != NULL) {
 			Course* temp = listCourses.head;
-			while (temp != NULL) {
+			for (int i = 0; i < (page - 1) * 10; i++) {
+				temp = temp->next;
+			}
+			while (i < 10 && temp != NULL) {
 				gotoXY(38, yPos); cout << temp->id << "  ";
 				string courseName = temp->courseName;
 				if (courseName.length() > 24) courseName = courseName.substr(0, 24);
 				cout << courseName; 
 				gotoXY(75, yPos); cout << temp->academicYear;
 				yPos++;
+				i++;
 				temp = temp->next;
 			}
 			yPos++;
-			gotoXY(58, yPos); cout << "Back";
-			yPos = 12;
-			if (curPos == listCourses.size) yPos++;
+			gotoXY(60, yPos);
+			if (page > 1) cout << char(174);
+			cout << char(174) << "  " << page << "  " << char(175);
+			if (page < numberPages) cout << char(175);
+			yPos++;
+			gotoXY(38, yPos); cout << "Back";
+			yPos = 13;
+			if (curPos == i) yPos += 2;
 			gotoXY(36, curPos + yPos); cout << cursor;
-			yPos = 12;
+			yPos = 13;
 		}
 		else {
 			notifyBox("Empty List...");
 			return;
 		}
-	} while (command(curPos, 0, listCourses.size, viewCourseOption));
+	} while (viewCoursesCommand(curPos, 0, i, page, numberPages, viewCourseOption));
 }
 void manageCourses() {
 	const int width = 40;

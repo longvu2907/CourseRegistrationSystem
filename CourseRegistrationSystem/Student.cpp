@@ -2,6 +2,7 @@
 
 ListCourses enrolledCourses;
 ListCourses registedCourses;
+ListCourses posibleCourses;
 const char cursor = char(175);
 
 void userAccount();
@@ -9,13 +10,22 @@ void Profile();
 void coursesReg();
 void setting();
 
-void saveEnrolledCourses();
+Course* copyCourseData(Course* src);
+void saveRegistedCourses();
 void getEnrolledCourses();
 int command(int&, int, int, function<int(int)>);
 int studentOption(int);
 int coursesRegOption(int);
 
-
+void getPosibleCourses() {
+	initList(posibleCourses);
+	Course* temp = listCourses.head;
+	while (temp != NULL) {
+		if (currentUser->academicYear <= temp->academicYear)
+			addCourse(posibleCourses, copyCourseData(temp));
+		temp = temp->next;
+	}
+}
 void studentMenu() {
 	const int width = 40;
 	const int height = 10;
@@ -24,6 +34,7 @@ void studentMenu() {
 
 	int curPos = 0;
 	int yPos = 10;
+
 	do {
 		hideCursor(true);
 		schoolYearPath = "./data/" + currentSchoolYear;
@@ -62,6 +73,7 @@ Course* copyCourseData(Course* src) {
 	newCourse->wDay = src->wDay;
 	newCourse->session[0] = src->session[0];
 	newCourse->session[1] = src->session[1];
+	newCourse->academicYear = src->academicYear;
 	newCourse->next = NULL;
 	return newCourse;
 }
@@ -84,30 +96,75 @@ Course* isRegistered(Course* course) {
 	}
 	return NULL;
 }
-int registerCoursesOption(int curPos) {
+int registerCoursesOption(int curPos, int page) {
 	int count = 0;
 	
-	Course* temp = listCourses.head;
-	Course* courseChoosed = NULL;
-	while (temp != NULL) {
+	Course* temp = posibleCourses.head;
+	for (int i = 0; i < (page - 1) * 10; i++) {
+		temp = temp->next;
+	}
+	Course* courseSelected = NULL;
+	while (count < 10 && temp != NULL) {
 		if (count == curPos) {
-			courseChoosed = temp;
+			courseSelected = temp;
 			break;
 		}
 		count++;
 		temp = temp->next;
 	}
-	if (courseChoosed == NULL) {
-		return 0;
+	if (courseSelected == NULL) {
+		switch (curPos) {
+		case 10:
+			loading("Saving...");
+			saveRegistedCourses();
+			return 0;
+		case 11:
+			return 0;
+		}
 	}
 	else {
-		if (isRegistered(courseChoosed) != NULL) deleteCourse(registedCourses, isRegistered(courseChoosed));
+		if (isRegistered(courseSelected) != NULL) deleteCourse(registedCourses, isRegistered(courseSelected));
 		else if (registedCourses.size >= 5) notifyBox("You can enroll in at most 5 courses in a semester.");
-		else if (isConflicted(courseChoosed)) notifyBox("This course is conflicted with another course in your list of courses registed.");
+		else if (isConflicted(courseSelected)) notifyBox("This course is conflicted with another course in your list of courses registed.");
 		else {
-			addCourse(registedCourses, copyCourseData(courseChoosed));
+			addCourse(registedCourses, copyCourseData(courseSelected));
 		}
 		return 1;
+	}
+}
+int registerCoursesCommand(int& curPos, int minPos, int maxPos, int& page, int numberPages, function<int(int, int)> option) {
+	int key = _getch();
+	switch (key) {
+	case 13:
+		return option(curPos, page);
+	case 224:
+		key = _getch();
+		switch (key) {
+		case 72://up key
+			if (curPos > minPos) curPos--;
+			else {
+				curPos = maxPos;
+			}
+			break;
+		case 80://down key
+			if (curPos < maxPos) curPos++;
+			else {
+				curPos = minPos;
+			}
+			break;
+		case 75://left key
+			if (page > 1) {
+				page--;
+				curPos = 0;
+			}
+			break;
+		case 77://right key
+			if (page < numberPages) {
+				page++;
+				curPos = 0;
+			}
+			break;
+		}
 	}
 	return 1;
 }
@@ -118,13 +175,17 @@ void registerCourses() {
 	const int top = 8;
 	int curPos = 0;
 	int yPos = 13;
+	int numberPages = (posibleCourses.size / 10) + 1;
+	int page = 1;
+	int i = 0;
+	registedCourses = enrolledCourses;
 
-	initList(registedCourses);
 	do {
+		i = 0;
 		if (isOnRegSession()) {
 			system("cls");
 			height = 7;
-			height += listCourses.size;
+			height += posibleCourses.size;
 			gotoXY(55, 5); cout << "HCMUS Portal";
 			gotoXY(53, 7); cout << "Register Courses";
 			gotoXY(20, 10); cout << "ID";
@@ -137,9 +198,12 @@ void registerCourses() {
 			gotoXY(79, 11); cout << "year";
 			gotoXY(87, 10); cout << "Schedule";
 			drawBox(width, height, left, top);
-			if (listCourses.head != NULL) {
-				Course* temp = listCourses.head;
-				while (temp != NULL) {
+			if (posibleCourses.head != NULL) {
+				Course* temp = posibleCourses.head;
+				for (int i = 0; i < (page - 1) * 10; i++) {
+					temp = temp->next;
+				}
+				while (i < 10 && temp != NULL) {
 					gotoXY(20, yPos); cout << temp->id;
 					string courseName = temp->courseName;
 					if (courseName.length() > 24) courseName = courseName.substr(0, 24);
@@ -153,12 +217,20 @@ void registerCourses() {
 					if (isRegistered(temp)) cout << char(254);
 					else cout << " ";
 					yPos++;
+					i++;
 					temp = temp->next;
 				}
 				yPos++;
+				gotoXY(60, yPos);
+				if (page > 1) cout << char(174);
+				cout << char(174) << "  " << page << "  " << char(175);
+				if (page < numberPages) cout << char(175);
+				yPos++;
+				gotoXY(20, yPos); cout << "Save";
+				yPos++;
 				gotoXY(20, yPos); cout << "Back";
 				yPos = 13;
-				if (curPos == listCourses.size) yPos++;
+				if (curPos == 10 || curPos == 11) yPos += 2;
 				gotoXY(18, curPos + yPos); cout << cursor;
 				yPos = 13;
 			}
@@ -171,7 +243,7 @@ void registerCourses() {
 			notifyBox("Courses registration session has expired from " + dateToStr(listCourses.endDate));
 			return;
 		}
-	} while (command(curPos, 0, listCourses.size, registerCoursesOption));
+	} while (registerCoursesCommand(curPos, 0, 11, page, numberPages, registerCoursesOption));
 }
 void viewEnrolledCourses() {
 	const int width = 40;
@@ -180,8 +252,7 @@ void viewEnrolledCourses() {
 	const int top = 8;
 	int curPos = 0;
 	int yPos = 10;
-	
-	getEnrolledCourses();
+
 	do {
 		system("cls");
 		height = 5;
@@ -219,6 +290,8 @@ void coursesReg() {
 	int yPos = 10;
 	do {
 		getListCourses();
+		getEnrolledCourses();
+		getPosibleCourses();
 		hideCursor(true);
 		schoolYearPath = "./data/" + currentSchoolYear;
 		system("cls");
@@ -277,16 +350,25 @@ int coursesRegOption(int curPos) {
 	return 1;
 }
 
-void saveEnrolledCourses() {
-	ofstream fout(semesterPath + "/student/" + currentUser->id + ".dat", ios::binary);
-	Course* temp = enrolledCourses.head;
+void saveRegistedCourses() {
+	ofstream fout(semesterPath + "/student/" + currentUser->id + ".dat");
+	Course* temp = registedCourses.head;
 	while (temp != NULL) {
-		Course data = *temp;
-		fout.write((char*)&data, sizeof(Course));
+		toUpper(temp->wDay);
+		string session = temp->session[0] + "-" + temp->session[1];
+		fout << temp->id << "," << temp->courseName << "," << temp->teacherName << ","
+			<< temp->credits << "," << temp->academicYear << "," << temp->maxStudents << "," << temp->wDay << "," << session << endl;
+		temp = temp->next;
 	}
 	fout.close();
 }
 void getEnrolledCourses() {
+	ifstream fin(semesterPath + "/student/" + currentUser->id + ".dat");
 	initList(enrolledCourses);
-	saveEnrolledCourses();
+	if (!fin) return;
+	while (true) {
+		Course* course = convertCourseData(fin);
+		if (fin.eof()) break;
+		addCourse(enrolledCourses, course);
+	}
 }

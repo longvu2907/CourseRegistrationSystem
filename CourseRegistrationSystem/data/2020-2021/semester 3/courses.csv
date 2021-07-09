@@ -1,4 +1,4 @@
-Courses registration session:,07/07/2021-10/07/2021,,,,,,
+Courses registration session:,07/07/2021-12/07/2021
 ID,Course name,Teacher name,Credits,Academic year,Number of students,Day of the week,Session
 CSC10001,Ky Thuat Lap Trinh,Nguyen Le Hoang Dung,4,2020,150,FRI,S3-S4
 MTH00030,Dai So Tuyen Tinh,Le Van Hop,3,2020,150,TUE,S1-S2
@@ -14,3 +14,4 @@ GEO00002,Khoa hoc Trai Dat,Nguyen Van A,2,2020,106,MON,S1-S2
 CHE00002,Hoa dai cuong 2,Nguyen Thi B,3,2020,70,MON,S1-S2
 ENV00001,Moi truong dai cuong,Nguyen Van F,2,2020,175,TUE,S1-S2
 CSC00003,Tin hoc co so,Nguyen Van G,3,2020,29,WED,S3-S4
+CSC10009,He thong may tinh,Nguyen Van A,2,2019,99,WED,S3-S4
