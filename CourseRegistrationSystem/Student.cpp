@@ -1,31 +1,26 @@
 #include "Student.h"
 
 ListCourses enrolledCourses;
-ListCourses registedCourses;
 ListCourses posibleCourses;
-const char cursor = char(175);
-
+const char cursorLeft = char(175);
+const char cursorRight = char(174);
 void userAccount();
 void Profile();
 void coursesReg();
 void setting();
 
 Course* copyCourseData(Course* src);
-void saveRegistedCourses();
+void saveEnrolledCourses();
 void getEnrolledCourses();
+void getPosibleCourses();
+void saveListCourses(ListCourses);
 int command(int&, int, int, function<int(int)>);
 int studentOption(int);
+int viewCoursesCommand(int&, int, int, int&, int, function<int(int, int)>);
+int updateCourseCommand(int&, int, int, Course*, function<int(int, Course*)>);
+void courseDetail(Course* course);
 int coursesRegOption(int);
 
-void getPosibleCourses() {
-	initList(posibleCourses);
-	Course* temp = listCourses.head;
-	while (temp != NULL) {
-		if (currentUser->academicYear <= temp->academicYear)
-			addCourse(posibleCourses, copyCourseData(temp));
-		temp = temp->next;
-	}
-}
 void studentMenu() {
 	const int width = 40;
 	const int height = 10;
@@ -51,15 +46,20 @@ void studentMenu() {
 		yPos++;
 		gotoXY(52, yPos); cout << "Courses registration";
 		yPos++;
+		gotoXY(52, yPos); cout << "List of classes";
+		yPos++;
+		gotoXY(52, yPos); cout << "List of courses";
+		yPos++;
 		gotoXY(52, yPos); cout << "Setting";
 		yPos++;
 		yPos++;
 		gotoXY(52, yPos); cout << "Exit";
 		yPos = 10;
 		if (curPos == 4) yPos++;
-		gotoXY(50, curPos + yPos); cout << cursor;
+		gotoXY(50, curPos + yPos); cout << cursorLeft;
+		gotoXY(75, curPos + yPos); cout << cursorRight;
 		yPos = 10;
-	} while (command(curPos, 0, 4, studentOption));
+	} while (command(curPos, 0, 6, studentOption));
 }
 
 //Courses Registration
@@ -70,6 +70,7 @@ Course* copyCourseData(Course* src) {
 	newCourse->teacherName = src->teacherName;
 	newCourse->credits = src->credits;
 	newCourse->maxStudents = src->maxStudents;
+	newCourse->numberRegistered = src->numberRegistered;
 	newCourse->wDay = src->wDay;
 	newCourse->session[0] = src->session[0];
 	newCourse->session[1] = src->session[1];
@@ -78,7 +79,7 @@ Course* copyCourseData(Course* src) {
 	return newCourse;
 }
 bool isConflicted(Course* course) {
-	Course* temp = registedCourses.head;
+	Course* temp = enrolledCourses.head;
 	while (temp != NULL) {
 		if ((temp->session[0] == course->session[0] || temp->session[1] == course->session[1]
 			|| temp->session[1] == course->session[0] || temp->session[0] == course->session[1])
@@ -89,14 +90,14 @@ bool isConflicted(Course* course) {
 	return false;
 }
 Course* isRegistered(Course* course) {
-	Course* temp = registedCourses.head;
+	Course* temp = enrolledCourses.head;
 	while (temp != NULL) {
 		if (temp->id == course->id) return temp;
 		temp = temp->next;
 	}
 	return NULL;
 }
-int registerCoursesOption(int curPos, int page) {
+int registerCoursesOption(int curPos, int maxPos, int page) {
 	int count = 0;
 	
 	Course* temp = posibleCourses.head;
@@ -113,30 +114,36 @@ int registerCoursesOption(int curPos, int page) {
 		temp = temp->next;
 	}
 	if (courseSelected == NULL) {
-		switch (curPos) {
-		case 10:
+		int n = maxPos - curPos;
+		switch (n) {
+		case 1:
 			loading("Saving...");
-			saveRegistedCourses();
+			saveEnrolledCourses();
+			saveListCourses(posibleCourses);
 			return 0;
-		case 11:
+		case 0:
 			return 0;
 		}
 	}
 	else {
-		if (isRegistered(courseSelected) != NULL) deleteCourse(registedCourses, isRegistered(courseSelected));
-		else if (registedCourses.size >= 5) notifyBox("You can enroll in at most 5 courses in a semester.");
+		if (isRegistered(courseSelected) != NULL) notifyBox("You have already registered this course.");
+		else if (enrolledCourses.size >= 5) notifyBox("You can enroll in at most 5 courses in a semester.");
 		else if (isConflicted(courseSelected)) notifyBox("This course is conflicted with another course in your list of courses registed.");
 		else {
-			addCourse(registedCourses, copyCourseData(courseSelected));
+			if (courseSelected->numberRegistered >= courseSelected->maxStudents) notifyBox("This course is full");
+			else {
+				courseSelected->numberRegistered++;
+				addCourse(enrolledCourses, copyCourseData(courseSelected));
+			}
 		}
 		return 1;
 	}
 }
-int registerCoursesCommand(int& curPos, int minPos, int maxPos, int& page, int numberPages, function<int(int, int)> option) {
+int registerCoursesCommand(int& curPos, int minPos, int maxPos, int& page, int numberPages, function<int(int, int, int)> option) {
 	int key = _getch();
 	switch (key) {
 	case 13:
-		return option(curPos, page);
+		return option(curPos, maxPos, page);
 	case 224:
 		key = _getch();
 		switch (key) {
@@ -170,22 +177,23 @@ int registerCoursesCommand(int& curPos, int minPos, int maxPos, int& page, int n
 }
 void registerCourses() {
 	const int width = 85;
-	int height = 7;
+	int height = 10;
 	const int left = 17;
 	const int top = 8;
 	int curPos = 0;
 	int yPos = 13;
-	int numberPages = (posibleCourses.size / 10) + 1;
+	int numberPages;
 	int page = 1;
 	int i = 0;
-	registedCourses = enrolledCourses;
 
+	getListCourses();
+	getPosibleCourses();
 	do {
+		height = 10;
 		i = 0;
+		numberPages = (posibleCourses.size / 10) + 1;
 		if (isOnRegSession()) {
 			system("cls");
-			height = 7;
-			height += posibleCourses.size;
 			gotoXY(55, 5); cout << "HCMUS Portal";
 			gotoXY(53, 7); cout << "Register Courses";
 			gotoXY(20, 10); cout << "ID";
@@ -197,7 +205,6 @@ void registerCourses() {
 			gotoXY(77, 10); cout << "Academic";
 			gotoXY(79, 11); cout << "year";
 			gotoXY(87, 10); cout << "Schedule";
-			drawBox(width, height, left, top);
 			if (posibleCourses.head != NULL) {
 				Course* temp = posibleCourses.head;
 				for (int i = 0; i < (page - 1) * 10; i++) {
@@ -220,18 +227,27 @@ void registerCourses() {
 					i++;
 					temp = temp->next;
 				}
+				height += i;
+				drawBox(width, height, left, top);
 				yPos++;
-				gotoXY(60, yPos);
+				gotoXY(58, yPos);
 				if (page > 1) cout << char(174);
 				cout << char(174) << "  " << page << "  " << char(175);
 				if (page < numberPages) cout << char(175);
 				yPos++;
-				gotoXY(20, yPos); cout << "Save";
+				gotoXY(59, yPos); cout << "Save";
 				yPos++;
-				gotoXY(20, yPos); cout << "Back";
+				gotoXY(59, yPos); cout << "Back";
 				yPos = 13;
-				if (curPos == 10 || curPos == 11) yPos += 2;
-				gotoXY(18, curPos + yPos); cout << cursor;
+				if (curPos == i || curPos == i + 1) {
+					yPos += 2;
+					gotoXY(57, curPos + yPos); cout << cursorLeft;
+					gotoXY(64, curPos + yPos); cout << cursorRight;
+				}
+				else {
+					gotoXY(18, curPos + yPos); cout << cursorLeft;
+					gotoXY(102, curPos + yPos); cout << cursorRight;
+				}
 				yPos = 13;
 			}
 			else {
@@ -243,42 +259,143 @@ void registerCourses() {
 			notifyBox("Courses registration session has expired from " + dateToStr(listCourses.endDate));
 			return;
 		}
-	} while (registerCoursesCommand(curPos, 0, 11, page, numberPages, registerCoursesOption));
+	} while (registerCoursesCommand(curPos, 0, i + 1, page, numberPages, registerCoursesOption));
 }
-void viewEnrolledCourses() {
-	const int width = 40;
-	int height = 5;
-	const int left = 40;
+int updateEnrolledListOption(int curPos, Course* course) {
+	switch (curPos)
+	{
+	case 0:
+		courseDetail(course);
+		return 1;
+		break;
+	case 1:
+		course->numberRegistered--;
+		saveListCourses(enrolledCourses);
+		deleteCourse(enrolledCourses, course);
+		break;
+	case 2:
+		break;
+	}
+	
+	saveEnrolledCourses();
+	return 0;
+}
+void updateEnrolledList(Course* course) {
+	const int width = 30;
+	const int height = 7;
+	const int left = 45;
 	const int top = 8;
 	int curPos = 0;
 	int yPos = 10;
 
 	do {
 		system("cls");
-		height = 5;
-		height += enrolledCourses.size;
 		gotoXY(55, 5); cout << "HCMUS Portal";
-		gotoXY(53, 7); cout << "Register Courses";
+		gotoXY(55, 7); cout << "Update Course";
 		drawBox(width, height, left, top);
+		gotoXY(58, yPos); cout << "Detail";
+		yPos++;
+		gotoXY(58, yPos); cout << "Remove";
+		yPos++;
+		yPos++;
+		gotoXY(58, yPos); cout << "Back";
+		yPos = 10;
+		if (curPos == 2) yPos++;
+		gotoXY(56, curPos + yPos); cout << cursorLeft;
+		gotoXY(65, curPos + yPos); cout << cursorRight;
+		yPos = 10;
+	} while (updateCourseCommand(curPos, 0, 2, course, updateEnrolledListOption));
+
+	saveCourses();
+}
+int viewEnrolledListOption(int curPos, int page) {
+	int count = 0;
+
+	Course* temp = enrolledCourses.head;
+	for (int i = 0; i < (page - 1) * 10; i++) {
+		temp = temp->next;
+	}
+	Course* courseSelected = NULL;
+	while (count < 10 && temp != NULL) {
+		if (count == curPos) {
+			courseSelected = temp;
+			break;
+		}
+		count++;
+		temp = temp->next;
+	}
+	if (courseSelected == NULL) {
+		return 0;
+	}
+	else {
+		if (isOnRegSession()) updateEnrolledList(courseSelected);
+		else courseDetail(courseSelected);
+	}
+	return 1;
+}
+void viewEnrolledList() {
+	const int width = 50;
+	int height = 9;
+	const int left = 35;
+	const int top = 8;
+	int curPos = 0;
+	int yPos = 13;
+	int numberPages;
+	int page = 1;
+	int i = 0;
+
+	do {
+		numberPages = (enrolledCourses.size / 10) + 1;
+		i = 0;
+		height = 9;
+		system("cls");
+		gotoXY(55, 5); cout << "HCMUS Portal";
+		gotoXY(55, 7); cout << "List Course";
+		gotoXY(38, 10); cout << "ID";
+		gotoXY(48, 10); cout << "Course name";
+		gotoXY(73, 10); cout << "Schedule";
 		if (enrolledCourses.head != NULL) {
 			Course* temp = enrolledCourses.head;
-			while (temp != NULL) {
-				gotoXY(43, yPos); cout << temp->id << "   " << temp->courseName;
-				yPos++;
+			for (int i = 0; i < (page - 1) * 10; i++) {
 				temp = temp->next;
 			}
+			while (i < 10 && temp != NULL) {
+				gotoXY(38, yPos); cout << temp->id;
+				string courseName = temp->courseName;
+				if (courseName.length() > 24) courseName = courseName.substr(0, 24);
+				gotoXY(48, yPos); cout << courseName;
+				string schedule = temp->wDay + "(" + temp->session[0] + "-" + temp->session[1] + ")";
+				gotoXY(73, yPos); cout << schedule;
+				yPos++;
+				i++;
+				temp = temp->next;
+			}
+			height += i;
+			drawBox(width, height, left, top);
 			yPos++;
-			gotoXY(58, yPos); cout << "Back";
-			yPos = 10;
-			if (curPos == enrolledCourses.size) yPos++;
-			gotoXY(78, curPos + yPos); cout << cursor;
-			yPos = 10;
+			gotoXY(58, yPos);
+			if (page > 1) cout << char(174);
+			cout << char(174) << "  " << page << "  " << char(175);
+			if (page < numberPages) cout << char(175);
+			yPos++;
+			gotoXY(59, yPos); cout << "Back";
+			yPos = 13;
+			if (curPos == i) {
+				yPos += 2;
+				gotoXY(57, curPos + yPos); cout << cursorLeft;
+				gotoXY(64, curPos + yPos); cout << cursorRight;
+			}
+			else {
+				gotoXY(36, curPos + yPos); cout << cursorLeft;
+				gotoXY(84, curPos + yPos); cout << cursorRight;
+			}
+			yPos = 13;
 		}
 		else {
 			notifyBox("Empty List...");
 			return;
 		}
-	} while (command(curPos, 0, enrolledCourses.size, studentOption));
+	} while (viewCoursesCommand(curPos, 0, i, page, numberPages, viewEnrolledListOption));
 }
 void coursesReg() {
 	const int width = 40;
@@ -298,19 +415,85 @@ void coursesReg() {
 		drawBox(width, height, left, top);
 		gotoXY(55, 5); cout << "HCMUS Portal";
 		gotoXY(51, 7); cout << "Courses Registration";
-		gotoXY(48, yPos); cout << "Register Courses";
+		gotoXY(52, yPos); cout << "Register Courses";
 		yPos++;
-		gotoXY(48, yPos); cout << "View Enrolled Courses";
+		gotoXY(52, yPos); cout << "View Enrolled Courses";
 		yPos++;
 		yPos++;
-		gotoXY(48, yPos); cout << "Back";
+		gotoXY(52, yPos); cout << "Back";
 		yPos = 10;
 		if (curPos == 2) yPos++;
-		gotoXY(46, curPos + yPos); cout << cursor;
+		gotoXY(50, curPos + yPos); cout << cursorLeft;
+		gotoXY(76, curPos + yPos); cout << cursorRight;
 		yPos = 10;
 	} while (command(curPos, 0, 2, coursesRegOption));
 }
 
+//View classes list
+void viewListOfClasses() {
+	const int width = 50;
+	int height = 9;
+	const int left = 35;
+	const int top = 8;
+	int curPos = 0;
+	int yPos = 13;
+	int numberPages;
+	int page = 1;
+	int i = 0;
+
+	do {
+		numberPages = (listClasses.size / 10) + 1;
+		i = 0;
+		height = 9;
+		system("cls");
+		gotoXY(55, 5); cout << "HCMUS Portal";
+		gotoXY(55, 7); cout << "List Course";
+		gotoXY(38, 10); cout << "ID";
+		gotoXY(48, 10); cout << "Course name";
+		gotoXY(73, 10); cout << "Schedule";
+		if (listClasses.head != NULL) {
+			Class* temp = listClasses.head;
+			for (int i = 0; i < (page - 1) * 10; i++) {
+				temp = temp->next;
+			}
+			while (i < 10 && temp != NULL) {
+				gotoXY(38, yPos); cout << temp->className;
+				yPos++;
+				i++;
+				temp = temp->next;
+			}
+			height += i;
+			drawBox(width, height, left, top);
+			yPos++;
+			gotoXY(58, yPos);
+			if (page > 1) cout << char(174);
+			cout << char(174) << "  " << page << "  " << char(175);
+			if (page < numberPages) cout << char(175);
+			yPos++;
+			gotoXY(59, yPos); cout << "Back";
+			yPos = 13;
+			if (curPos == i) {
+				yPos += 2;
+				gotoXY(57, curPos + yPos); cout << cursorLeft;
+				gotoXY(64, curPos + yPos); cout << cursorRight;
+			}
+			else {
+				gotoXY(36, curPos + yPos); cout << cursorLeft;
+				gotoXY(84, curPos + yPos); cout << cursorRight;
+			}
+			yPos = 13;
+		}
+		else {
+			notifyBox("Empty List...");
+			return;
+		}
+	} while (viewCoursesCommand(curPos, 0, i, page, numberPages, viewEnrolledListOption));
+}
+
+//View courses list
+void viewListOfCourses() {
+
+}
 
 int studentOption(int curPos) {
 	switch (curPos) {
@@ -324,9 +507,15 @@ int studentOption(int curPos) {
 		coursesReg();
 		break;
 	case 3:
-		setting();
+		viewListOfClasses();
 		break;
 	case 4:
+		viewListOfCourses();
+		break;
+	case 5:
+		setting();
+		break;
+	case 6:
 		exit(0);
 		break;
 	}
@@ -338,7 +527,7 @@ int coursesRegOption(int curPos) {
 		registerCourses();
 		break;
 	case 1:
-		viewEnrolledCourses();
+		viewEnrolledList();
 		break;
 	case 2:
 		return 0;
@@ -350,15 +539,17 @@ int coursesRegOption(int curPos) {
 	return 1;
 }
 
-void saveRegistedCourses() {
+void saveEnrolledCourses() {
 	ofstream fout(semesterPath + "/student/" + currentUser->id + ".dat");
-	Course* temp = registedCourses.head;
+	Course* temp = enrolledCourses.head;
 	while (temp != NULL) {
 		toUpper(temp->wDay);
 		string session = temp->session[0] + "-" + temp->session[1];
 		fout << temp->id << "," << temp->courseName << "," << temp->teacherName << ","
-			<< temp->credits << "," << temp->academicYear << "," << temp->maxStudents << "," << temp->wDay << "," << session << endl;
+			<< temp->credits << "," << temp->academicYear << "," << temp->maxStudents << ","
+			<< temp->numberRegistered << "," << temp->wDay << "," << session;
 		temp = temp->next;
+		if (temp != NULL) fout << endl;
 	}
 	fout.close();
 }
@@ -366,9 +557,28 @@ void getEnrolledCourses() {
 	ifstream fin(semesterPath + "/student/" + currentUser->id + ".dat");
 	initList(enrolledCourses);
 	if (!fin) return;
-	while (true) {
-		Course* course = convertCourseData(fin);
-		if (fin.eof()) break;
-		addCourse(enrolledCourses, course);
+	while (!fin.eof()) {
+		addCourse(enrolledCourses, convertCourseData(fin));
 	}
+}
+void getPosibleCourses() {
+	initList(posibleCourses);
+	Course* temp = listCourses.head;
+	while (temp != NULL) {
+		if (currentUser->academicYear <= temp->academicYear)
+			addCourse(posibleCourses, copyCourseData(temp));
+		temp = temp->next;
+	}
+}
+void saveListCourses(ListCourses list) {
+	Course* temp = list.head;
+	Course* curr = listCourses.head;
+	while (curr != NULL && temp != NULL) {
+		if (temp->id == curr->id) {
+			curr->numberRegistered = temp->numberRegistered;
+			temp = temp->next;
+		}
+		curr = curr->next;
+	}
+	saveCourses();
 }

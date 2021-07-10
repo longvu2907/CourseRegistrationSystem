@@ -88,6 +88,18 @@ struct ListCourses {
 	Date startDate, endDate;
 	int size;
 };
+struct Class {
+	string className;
+	fs::path path;
+	Class* prev;
+	Class* next;
+};
+struct ListClasses {
+	Class* head;
+	Class* tail;
+	int size;
+};
+
 
 Date strToDate(string str);
 string dateToStr(Date date);
@@ -106,6 +118,7 @@ void alignRow(int x, int& y, string text, int rowLength);
 void addUser(ListUser& list, User* user);
 void addStudent(ListStudent& list, Student* student);
 void addCourse(ListCourses& list, Course* course);
+void addClass(ListClasses& list, Class* course);
 void deleteCourse(ListCourses& list, Course* course);
 void saveListUser();
 void saveClass(string path, ListStudent listStudent);
@@ -117,15 +130,18 @@ Course* convertCourseData(ifstream& data);
 void initList(ListUser& list);
 void initList(ListStudent& list);
 void initList(ListCourses& list);
+void initList(ListClasses& list);
 bool isExpired(Date currentDate, Date endDate);
 bool isOnRegSession();
 void getListCourses();
+void getListClasses();
 void getCurrentDate();
 void getCurrentSchoolYear();
 void getCurrentSemester();
 
 extern User* currentUser;
 extern ListUser listUser;
+extern ListClasses listClasses;
 extern Date currentDate;
 extern string currentSchoolYear;
 extern Semester currentSemester;

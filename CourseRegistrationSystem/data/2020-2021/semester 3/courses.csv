@@ -1,17 +1,6 @@
 Courses registration session:,07/07/2021-12/07/2021
-ID,Course name,Teacher name,Credits,Academic year,Number of students,Day of the week,Session
-CSC10001,Ky Thuat Lap Trinh,Nguyen Le Hoang Dung,4,2020,150,FRI,S3-S4
-MTH00030,Dai So Tuyen Tinh,Le Van Hop,3,2020,150,TUE,S1-S2
-MTH00082,TH Vi Tich Phan 2B,Le Van Chanh,1,2020,40,SAT,S1-S2
-BAA00003,Tu Tuong Ho Chi Minh,Nguyen Cao Thien Bao,2,2020,100,MON,S3-S4
-GEO00002,Khoa hoc Trai Dat,Nguyen Van A,2,2020,106,MON,S1-S2
-CHE00002,Hoa dai cuong 2,Nguyen Thi B,3,2020,70,MON,S1-S2
-ENV00001,Moi truong dai cuong,Nguyen Van F,2,2020,175,TUE,S1-S2
-CSC00003,Tin hoc co so,Nguyen Van G,3,2020,29,WED,S3-S4
-MTH00084,Thuc hanh dai so dai cuong,Nguyen Thi Thuy Duong,1,2020,50,MON,S1-S2
-PHY00001,Vat ly dai cuong 1 (Co - Nhiet),Trinh Hoa Lang,3,2020,150,MON,S1-S2
-GEO00002,Khoa hoc Trai Dat,Nguyen Van A,2,2020,106,MON,S1-S2
-CHE00002,Hoa dai cuong 2,Nguyen Thi B,3,2020,70,MON,S1-S2
-ENV00001,Moi truong dai cuong,Nguyen Van F,2,2020,175,TUE,S1-S2
-CSC00003,Tin hoc co so,Nguyen Van G,3,2020,29,WED,S3-S4
-CSC10009,He thong may tinh,Nguyen Van A,2,2019,99,WED,S3-S4
+ID,Course name,Teacher name,Credits,Academic year,Number of students, Number of enroller,Day of the week,Session
+CHE00002,Hoa dai cuong 2,Nguyen Thi B,3,2020,70,3,MON,S1-S2
+GEO00002,Khoa hoc Trai Dat,Nguyen Van A,2,2020,106,0,MON,S1-S2
+CSC00003,Tin hoc co so,Nguyen Van G,3,2020,29,1,WED,S3-S4
+ENV00001,Moi truong dai cuong,Nguyen Van F,2,2020,175,1,TUE,S1-S2

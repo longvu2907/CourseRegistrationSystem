@@ -7,6 +7,7 @@ Semester currentSemester;
 string semesterPath;
 ListCourses listCourses;
 string schoolYearPath;
+ListClasses listClasses;
 
 int dayofweek(int d, int m, int y)
 {
@@ -211,6 +212,19 @@ void addCourse(ListCourses& list, Course* course) {
 	}
 	list.size++;
 }
+void addClass(ListClasses& list, Class* c) {
+	if (c == NULL) return;
+	if (list.head == NULL) {
+		list.head = list.tail = c;
+		c->prev = NULL;
+	}
+	else {
+		list.tail->next = c;
+		c->prev = list.tail;
+		list.tail = c;
+	}
+	list.size++;
+}
 void deleteCourse(ListCourses& list, Course* course) {
 	if (course == list.head && course == list.tail) {
 		list.head = list.tail = NULL;
@@ -249,6 +263,11 @@ void initList(ListCourses& list) {
 	list.startDate = list.endDate = strToDate("0/0/0");
 	list.size = 0;
 }
+void initList(ListClasses& list) {
+	list.head = NULL;
+	list.tail = NULL;
+	list.size = 0;
+}
 void saveListUser() {
 	ofstream fout(userDataPath);
 	fout << "ID,Password,Last name,First name,Class,Gender,Date of Birth,Staff" << endl;
@@ -257,9 +276,10 @@ void saveListUser() {
 		string dateOfBirth = to_string(curr->dateOfBirth.day) + "/" + to_string(curr->dateOfBirth.month) + "/" + to_string(curr->dateOfBirth.year);
 		fout << curr->id << "," << curr->password << "," << curr->lastName << "," << curr->firstName
 			<< "," << curr->className << "," << curr->gender << ","  << dateOfBirth << "," << to_string(curr->academicYear) << ",";
-		if (curr->isStaff) fout << "TRUE" << endl;
-		else fout << "FALSE" << endl;
+		if (curr->isStaff) fout << "TRUE";
+		else fout << "FALSE";
 		curr = curr->next;
+		if (curr != NULL) fout << endl;
 	}
 	fout.close();
 }
@@ -272,9 +292,9 @@ void saveClass(string path, ListStudent listStudent) {
 		string dateOfBirth = to_string(curr->dateOfBirth.day) + "/" + to_string(curr->dateOfBirth.month) + "/" + to_string(curr->dateOfBirth.year);
 		fout << no << "," << curr->studentID << "," << curr->lastName << "," << curr->firstName << "," << curr->gender
 			<< "," << dateOfBirth << "," << curr->socialID;
-		fout << endl;
 		no++;
 		curr = curr->next;
+		if (curr != NULL) fout << endl;
 	}
 	fout.close();
 }
@@ -282,14 +302,16 @@ void saveCourses() {
 	ofstream fout(semesterPath + "/courses.csv");
 	fout << "Courses registration session:," << dateToStr(listCourses.startDate) << "-"
 		<< dateToStr(listCourses.endDate) << endl;
-	fout << "ID,Course name,Teacher name,Credits,Academic year,Number of students,Day of the week,Session" << endl;
+	fout << "ID,Course name,Teacher name,Credits,Academic year,Number of students, Number of enroller,Day of the week,Session" << endl;
 	Course* temp = listCourses.head;
 	while (temp != NULL) {
 		toUpper(temp->wDay);
 		string session = temp->session[0] + "-" + temp->session[1];
 		fout << temp->id << "," << temp->courseName << "," << temp->teacherName << ","
-			<< temp->credits << "," << temp->academicYear << "," << temp->maxStudents << "," << temp->wDay << "," << session << endl;
+			<< temp->credits << "," << temp->academicYear << "," << temp->maxStudents << "," 
+			<< temp->numberRegistered << "," << temp->wDay << "," << session;
 		temp = temp->next;
+		if (temp != NULL) fout << endl;
 	}
 	fout.close();
 }
@@ -334,7 +356,7 @@ Student* convertStudentData(ifstream& data) {
 }
 Course* convertCourseData(ifstream& data) {
 	Course* course = new Course;
-	string credits, maxStudents, session, academicYear;
+	string credits, maxStudents, numberRegistered, session, academicYear;
 	getline(data, course->id, ',');
 	if (course->id == "") return NULL;
 	getline(data, course->courseName, ',');
@@ -345,6 +367,8 @@ Course* convertCourseData(ifstream& data) {
 	course->academicYear = stoi(academicYear);
 	getline(data, maxStudents, ',');
 	course->maxStudents = stoi(maxStudents);
+	getline(data, numberRegistered, ',');
+	course->numberRegistered = stoi(numberRegistered);
 	getline(data, course->wDay, ',');
 	getline(data, session, '\n');
 	course->session[0] = session.substr(session.find('S'), 2);
@@ -394,9 +418,23 @@ void getListCourses() {
 	listCourses.startDate = strToDate(start);
 	listCourses.endDate = strToDate(end);
 	getline(fin, s);
-	while (true) {
-		if (fin.eof()) break;
+	while (!fin.eof()) {
 		addCourse(listCourses, convertCourseData(fin));
+	}
+}
+void getListClasses() {
+	initList(listClasses);
+	string path = "./data/" + currentSchoolYear + "/classes/";
+
+	std::string ext(".csv");
+	for (auto& p : fs::recursive_directory_iterator(path))
+	{
+		if (p.path().extension() == ext) {
+			Class* c = new Class;
+			c->className = p.path().stem().string();
+			c->path = p.path();
+			addClass(listClasses, c);
+		}
 	}
 }
 void getCurrentDate() {

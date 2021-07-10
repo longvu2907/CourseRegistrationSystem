@@ -14,8 +14,7 @@ void getListUsers() {
 	string  data = "";
 	getline(fin, data);
 	initList(listUser);
-	while (true) {
-		if (fin.eof()) break;
+	while (!fin.eof()) {
 		addUser(listUser, convertUserData(fin));
 	}
 }
@@ -119,7 +118,7 @@ void loginSystem() {
 	getCurrentDate();
 	getCurrentSchoolYear();
 	getCurrentSemester();
-
+	getListClasses();
 	while (true) {
 		hideCursor(false);
 		loginUI();
