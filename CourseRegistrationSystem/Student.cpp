@@ -13,6 +13,7 @@ Course* copyCourseData(Course* src);
 void saveEnrolledCourses();
 void getEnrolledCourses();
 void getPosibleCourses();
+ListStudent getListOfStudentInCourse(Course* course);
 void saveListCourses(ListCourses);
 int command(int&, int, int, function<int(int)>);
 int studentOption(int);
@@ -23,7 +24,7 @@ int coursesRegOption(int);
 
 void studentMenu() {
 	const int width = 40;
-	const int height = 10;
+	const int height = 11;
 	const int left = 40;
 	const int top = 8;
 
@@ -55,7 +56,7 @@ void studentMenu() {
 		yPos++;
 		gotoXY(52, yPos); cout << "Exit";
 		yPos = 10;
-		if (curPos == 4) yPos++;
+		if (curPos == 6) yPos++;
 		gotoXY(50, curPos + yPos); cout << cursorLeft;
 		gotoXY(75, curPos + yPos); cout << cursorRight;
 		yPos = 10;
@@ -63,6 +64,19 @@ void studentMenu() {
 }
 
 //Courses Registration
+Student* toStudent(User* user) {
+	Student* student = new Student;
+	student->studentID = user->id;
+	student->socialID = user->password;
+	student->lastName = user->lastName;
+	student->firstName = user->firstName;
+	student->gender = user->gender;
+	student->dateOfBirth = user->dateOfBirth;
+	student->academicYear = user->academicYear;
+	student->prev = NULL;
+	student->next = NULL;
+	return student;
+}
 Course* copyCourseData(Course* src) {
 	Course* newCourse = new Course;
 	newCourse->id = src->id;
@@ -132,8 +146,11 @@ int registerCoursesOption(int curPos, int maxPos, int page) {
 		else {
 			if (courseSelected->numberRegistered >= courseSelected->maxStudents) notifyBox("This course is full");
 			else {
+				ListStudent list = getListOfStudentInCourse(courseSelected);
 				courseSelected->numberRegistered++;
 				addCourse(enrolledCourses, copyCourseData(courseSelected));
+				addStudent(list, toStudent(currentUser));
+				saveListOfStudentInCourse(courseSelected, list);
 			}
 		}
 		return 1;
@@ -269,9 +286,14 @@ int updateEnrolledListOption(int curPos, Course* course) {
 		return 1;
 		break;
 	case 1:
-		course->numberRegistered--;
-		saveListCourses(enrolledCourses);
-		deleteCourse(enrolledCourses, course);
+		if (confirmBox()) {
+			ListStudent list = getListOfStudentInCourse(course);
+			course->numberRegistered--;
+			saveListCourses(enrolledCourses);
+			
+			deleteCourse(enrolledCourses, course);
+		}
+		else return 1;
 		break;
 	case 2:
 		break;
@@ -430,34 +452,59 @@ void coursesReg() {
 }
 
 //View classes list
-void viewListOfClasses() {
-	const int width = 50;
+ListStudent getListOfStudent(Class* c) {
+	ListStudent list;
+	initList(list);
+	ifstream fin(c->path);
+	if (fin.fail()) {
+		return list;
+	}
+	string s;
+	getline(fin, s);
+	while (!fin.eof()) {
+		addStudent(list, convertStudentData(fin));
+	}
+	return list;
+}
+int viewListOfStudentOption(int curPos, int page) {
+	return 0;
+}
+void viewListOfStudent(Class* c) {
+	const int width = 54;
 	int height = 9;
-	const int left = 35;
+	const int left = 33;
 	const int top = 8;
 	int curPos = 0;
 	int yPos = 13;
 	int numberPages;
 	int page = 1;
 	int i = 0;
-
+	int no;
+	ListStudent list = getListOfStudent(c);
 	do {
-		numberPages = (listClasses.size / 10) + 1;
+		numberPages = (list.size / 10) + 1;
 		i = 0;
 		height = 9;
 		system("cls");
 		gotoXY(55, 5); cout << "HCMUS Portal";
-		gotoXY(55, 7); cout << "List Course";
-		gotoXY(38, 10); cout << "ID";
-		gotoXY(48, 10); cout << "Course name";
-		gotoXY(73, 10); cout << "Schedule";
-		if (listClasses.head != NULL) {
-			Class* temp = listClasses.head;
+		gotoXY(58, 7); cout << c->className;
+		gotoXY(36, 10); cout << "No";
+		gotoXY(42, 10); cout << "ID";
+		gotoXY(52, 10); cout << "Last name";
+		gotoXY(77, 10); cout << "First name";
+		if (list.head != NULL) {
+			Student* temp = list.head;
 			for (int i = 0; i < (page - 1) * 10; i++) {
 				temp = temp->next;
 			}
 			while (i < 10 && temp != NULL) {
-				gotoXY(38, yPos); cout << temp->className;
+				no = (page - 1) * 10 + i + 1;
+				gotoXY(36, yPos); cout << no;
+				gotoXY(42, yPos); cout << temp->studentID;
+				string lastName = temp->lastName;
+				if (lastName.length() > 24) lastName = lastName.substr(0, 24);
+				gotoXY(52, yPos); cout << lastName;
+				gotoXY(77, yPos); cout << temp->firstName;
 				yPos++;
 				i++;
 				temp = temp->next;
@@ -471,28 +518,278 @@ void viewListOfClasses() {
 			if (page < numberPages) cout << char(175);
 			yPos++;
 			gotoXY(59, yPos); cout << "Back";
-			yPos = 13;
-			if (curPos == i) {
-				yPos += 2;
-				gotoXY(57, curPos + yPos); cout << cursorLeft;
-				gotoXY(64, curPos + yPos); cout << cursorRight;
-			}
-			else {
-				gotoXY(36, curPos + yPos); cout << cursorLeft;
-				gotoXY(84, curPos + yPos); cout << cursorRight;
-			}
+			gotoXY(57, curPos + yPos); cout << cursorLeft;
+			gotoXY(64, curPos + yPos); cout << cursorRight;
 			yPos = 13;
 		}
 		else {
 			notifyBox("Empty List...");
 			return;
 		}
-	} while (viewCoursesCommand(curPos, 0, i, page, numberPages, viewEnrolledListOption));
+	} while (viewCoursesCommand(curPos, 0, 0, page, numberPages, viewListOfStudentOption));
+}
+int viewListOfClassesCommand(int& curPos, int minPos, int maxPos, int& page, int numberPages, function<int(int, int)> option) {
+	int key = _getch();
+	switch (key) {
+	case 13:
+		return option(curPos, page);
+	case 224:
+		key = _getch();
+		switch (key) {
+		case 72://up key
+			if (curPos > minPos) curPos--;
+			else {
+				curPos = maxPos;
+			}
+			break;
+		case 80://down key
+			if (curPos < maxPos) curPos++;
+			else {
+				curPos = minPos;
+			}
+			break;
+		case 75://left key
+			if (page > 1) {
+				page--;
+				curPos = 0;
+			}
+			break;
+		case 77://right key
+			if (page < numberPages) {
+				page++;
+				curPos = 0;
+			}
+			break;
+		}
+	}
+	return 1;
+}
+int viewListOfClassesOption(int curPos, int page) {
+	int count = 0;
+
+	Class* temp = listClasses.head;
+	for (int i = 0; i < (page - 1) * 10; i++) {
+		temp = temp->next;
+	}
+	Class* classSelected = NULL;
+	while (count < 10 && temp != NULL) {
+		if (count == curPos) {
+			classSelected = temp;
+			break;
+		}
+		count++;
+		temp = temp->next;
+	}
+	if (classSelected == NULL) {
+		return 0;
+	}
+	else {
+		viewListOfStudent(classSelected);
+	}
+	return 1;
+}
+void viewListOfClasses() {
+	const int width = 40;
+	int height = 6;
+	const int left = 40;
+	const int top = 8;
+	int curPos = 0;
+	int yPos = 10;
+	int numberPages;
+	int page = 1;
+	int i = 0;
+
+	do {
+		numberPages = (listClasses.size / 10) + 1;
+		i = 0;
+		height = 6;
+		system("cls");
+		gotoXY(55, 5); cout << "HCMUS Portal";
+		gotoXY(53, 7); cout << "List Of Classes";
+		if (listClasses.head != NULL) {
+			Class* temp = listClasses.head;
+			for (int i = 0; i < (page - 1) * 10; i++) {
+				temp = temp->next;
+			}
+			while (i < 10 && temp != NULL) {
+				gotoXY(58, yPos); cout << temp->className;
+				yPos++;
+				i++;
+				temp = temp->next;
+			}
+			height += i;
+			drawBox(width, height, left, top);
+			yPos++;
+			gotoXY(58, yPos);
+			if (page > 1) cout << char(174);
+			cout << char(174) << "  " << page << "  " << char(175);
+			if (page < numberPages) cout << char(175);
+			yPos++;
+			gotoXY(59, yPos); cout << "Back";
+			yPos = 10;
+			if (curPos == i) {
+				yPos += 2;
+				gotoXY(57, curPos + yPos); cout << cursorLeft;
+				gotoXY(64, curPos + yPos); cout << cursorRight;
+			}
+			else {
+				gotoXY(56, curPos + yPos); cout << cursorLeft;
+				gotoXY(66, curPos + yPos); cout << cursorRight;
+			}
+			yPos = 10;
+		}
+		else {
+			notifyBox("Empty List...");
+			return;
+		}
+	} while (viewListOfClassesCommand(curPos, 0, i, page, numberPages, viewListOfClassesOption));
 }
 
 //View courses list
-void viewListOfCourses() {
+void viewListOfStudent(Course* c) {
+	const int width = 54;
+	int height = 9;
+	const int left = 33;
+	const int top = 8;
+	int curPos = 0;
+	int yPos = 13;
+	int numberPages;
+	int page = 1;
+	int i = 0;
+	int no;
+	ListStudent list = getListOfStudentInCourse(c);
+	do {
+		numberPages = (list.size / 10) + 1;
+		i = 0;
+		height = 9;
+		system("cls");
+		gotoXY(55, 5); cout << "HCMUS Portal";
+		textAlignCenter(c->courseName, left, width, 7);
+		gotoXY(36, 10); cout << "No";
+		gotoXY(42, 10); cout << "ID";
+		gotoXY(52, 10); cout << "Last name";
+		gotoXY(77, 10); cout << "First name";
+		if (list.head != NULL) {
+			Student* temp = list.head;
+			for (int i = 0; i < (page - 1) * 10; i++) {
+				temp = temp->next;
+			}
+			while (i < 10 && temp != NULL) {
+				no = (page - 1) * 10 + i + 1;
+				gotoXY(36, yPos); cout << no;
+				gotoXY(42, yPos); cout << temp->studentID;
+				string lastName = temp->lastName;
+				if (lastName.length() > 24) lastName = lastName.substr(0, 24);
+				gotoXY(52, yPos); cout << lastName;
+				gotoXY(77, yPos); cout << temp->firstName;
+				yPos++;
+				i++;
+				temp = temp->next;
+			}
+			height += i;
+			drawBox(width, height, left, top);
+			yPos++;
+			gotoXY(58, yPos);
+			if (page > 1) cout << char(174);
+			cout << char(174) << "  " << page << "  " << char(175);
+			if (page < numberPages) cout << char(175);
+			yPos++;
+			gotoXY(59, yPos); cout << "Back";
+			gotoXY(57, curPos + yPos); cout << cursorLeft;
+			gotoXY(64, curPos + yPos); cout << cursorRight;
+			yPos = 13;
+		}
+		else {
+			notifyBox("Empty List...");
+			return;
+		}
+	} while (viewCoursesCommand(curPos, 0, 0, page, numberPages, viewListOfStudentOption));
+}
+int viewListOfCourseOption(int curPos, int page) {
+	int count = 0;
 
+	Course* temp = listCourses.head;
+	for (int i = 0; i < (page - 1) * 10; i++) {
+		temp = temp->next;
+	}
+	Course* courseSelected = NULL;
+	while (count < 10 && temp != NULL) {
+		if (count == curPos) {
+			courseSelected = temp;
+			break;
+		}
+		count++;
+		temp = temp->next;
+	}
+	if (courseSelected == NULL) {
+		return 0;
+	}
+	else {
+		if (!isOnRegSession()) viewListOfStudent(courseSelected);
+		else notifyBox("Registration session has not ended");
+	}
+	return 1;
+}
+void viewListOfCourses() {
+	const int width = 40;
+	int height = 8;
+	const int left = 40;
+	const int top = 8;
+	int curPos = 0;
+	int yPos = 12;
+	int numberPages;
+	int page = 1;
+	int i = 0;
+
+	do {
+		numberPages = (listCourses.size / 10) + 1;
+		i = 0;
+		height = 8;
+		system("cls");
+		gotoXY(55, 5); cout << "HCMUS Portal";
+		gotoXY(53, 7); cout << "List Of Courses";
+		gotoXY(43, 10); cout << "ID";
+		gotoXY(54, 10); cout << "Course name";
+		if (listCourses.head != NULL) {
+			Course* temp = listCourses.head;
+			for (int i = 0; i < (page - 1) * 10; i++) {
+				temp = temp->next;
+			}
+			while (i < 10 && temp != NULL) {
+				gotoXY(43, yPos); cout << temp->id;
+				string courseName = temp->courseName;
+				if (courseName.length() > 25) courseName = courseName.substr(0, 24);
+				gotoXY(54, yPos); cout << courseName;
+				yPos++;
+				i++;
+				temp = temp->next;
+			}
+			height += i;
+			drawBox(width, height, left, top);
+			yPos++;
+			gotoXY(58, yPos);
+			if (page > 1) cout << char(174);
+			cout << char(174) << "  " << page << "  " << char(175);
+			if (page < numberPages) cout << char(175);
+			yPos++;
+			gotoXY(59, yPos); cout << "Back";
+			yPos = 12;
+			if (curPos == i) {
+				yPos += 2;
+				gotoXY(57, curPos + yPos); cout << cursorLeft;
+				gotoXY(64, curPos + yPos); cout << cursorRight;
+			}
+			else {
+				gotoXY(41, curPos + yPos); cout << cursorLeft;
+				gotoXY(80, curPos + yPos); cout << cursorRight;
+			}
+			yPos = 12;
+		}
+		else {
+			notifyBox("Empty List...");
+			return;
+		}
+	} while (viewListOfClassesCommand(curPos, 0, i, page, numberPages, viewListOfCourseOption));
 }
 
 int studentOption(int curPos) {
@@ -581,4 +878,28 @@ void saveListCourses(ListCourses list) {
 		curr = curr->next;
 	}
 	saveCourses();
+}
+ListStudent getListOfStudentInCourse(Course* course) {
+	ListStudent list;
+	initList(list);
+	ifstream fin("./data/" + currentSchoolYear + "/semester " +
+		to_string(currentSemester.semester) + "/courses/" + course->id + ".dat");
+	if (fin.fail()) {
+		return list;
+	}
+	while (!fin.eof()) {
+		addStudent(list, convertStudentData(fin));
+	}
+	return list;
+}
+void saveListOfStudentInCourse(Course* course, ListStudent list) {
+	ofstream fout("./data/" + currentSchoolYear + "/semester " +
+		to_string(currentSemester.semester) + "/courses/" + course->id + ".dat");
+	Student* temp = list.head;
+	while (temp != NULL) {
+		fout << temp->studentID << "," << temp->lastName << "," << temp->firstName << "," 
+			<< "," << temp->gender << "," << dateToStr(temp->dateOfBirth) << "," << temp->socialID << "," << temp->academicYear;
+		if (temp != NULL) fout << endl;
+	}
+	fout.close();
 }

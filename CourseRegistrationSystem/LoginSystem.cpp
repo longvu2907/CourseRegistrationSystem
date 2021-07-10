@@ -20,7 +20,7 @@ void getListUsers() {
 }
 
 User* login(string id, string password) {
-	User* data = listUser.pHead;
+	User* data = listUser.head;
 	while (data != NULL) {
 		if (id == data->id) {
 			if (password == data->password) return data;
@@ -93,8 +93,8 @@ void loginUI() {
 	const int top = 10;
 
 	drawBox(width, height, left, top);
-	gotoXY(52, 6);
-	cout << "HCMUS PORTAL - LOGIN";
+	textAlignCenter("HCMUS PORTAL", left, width, 6);
+	textAlignCenter("LOGIN", left, width, 7);
 	gotoXY(40, 8); cout << currentDate.wDay;
 	gotoXY(40, 9); cout << dateToStr(currentDate);
 	gotoXY(48, yPos);
@@ -119,6 +119,7 @@ void loginSystem() {
 	getCurrentSchoolYear();
 	getCurrentSemester();
 	getListClasses();
+	getListCourses();
 	while (true) {
 		hideCursor(false);
 		loginUI();

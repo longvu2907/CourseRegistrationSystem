@@ -138,6 +138,62 @@ void notifyBox(string msg) {
 	_getch();
 	system("cls");
 }
+bool confirmBox() {
+	hideCursor(true);
+	system("cls");
+	int width = 40;
+	int height = 6;
+	int left = 40;
+	int top = 8;
+	int yPos = 10;
+	int curPos = 0;
+
+	do
+	{
+		system("cls");
+		gotoXY(57, 7); cout << "CONFIRM";
+		textAlignCenter("ARE YOU SURE ?", left, width, yPos);
+		drawBox(width, height, left, top);
+		yPos += 2;
+		gotoXY(50, yPos); cout << "YES!";
+		gotoXY(70, yPos); cout << "NO";
+		if (curPos == 0) {
+			gotoXY(48, yPos); cout << char(175);
+			gotoXY(55, yPos); cout << char(174);
+		}
+		else {
+			gotoXY(68, yPos); cout << char(175);
+			gotoXY(75, yPos); cout << char(174);
+		}
+		int key = _getch();
+		switch (key) {
+		case 13:
+			if (curPos == 0) return true;
+			else return false;
+			break;
+		case 224:
+			key = _getch();
+			switch (key) {
+			case 72:
+			case 75:
+				if (curPos > 0) curPos--;
+				else {
+					curPos = 1;
+				}
+				break;
+			case 80:
+			case 77:
+				if (curPos < 1) curPos++;
+				else {
+					curPos = 0;
+				}
+				break;
+			}
+		}
+		yPos = 10;
+	} while (true);
+	
+}
 void drawBox(int width, int height, int left, int top) {
 	gotoXY(left, top);
 	cout << char(201);
@@ -174,28 +230,32 @@ void loading(string text) {
 	}
 	system("cls");
 }
+void textAlignCenter(string s, int left, int width, int y) {
+	int x = ((width - s.length()) / 2) + left + 1;
+	gotoXY(x, y); cout << s;
+}
 
 void addUser(ListUser& list, User* user) {
 	if (user == NULL) return;
-	if (list.pHead == NULL) {
-		list.pHead = list.pTail = user;
+	if (list.head == NULL) {
+		list.head = list.tail = user;
 	}
 	else {
-		list.pTail->next = user;
-		user->prev = list.pTail;
-		list.pTail = user;
+		list.tail->next = user;
+		user->prev = list.tail;
+		list.tail = user;
 	}
 	list.size++;
 }
 void addStudent(ListStudent& list, Student* student) {
 	if (student == NULL) return;
-	if (list.pHead == NULL) {
-		list.pHead = list.pTail = student;
+	if (list.head == NULL) {
+		list.head = list.tail = student;
 	}
 	else {
-		list.pTail->next = student;
-		student->prev = list.pTail;
-		list.pTail = student;
+		list.tail->next = student;
+		student->prev = list.tail;
+		list.tail = student;
 	}
 	list.size++;
 }
@@ -248,13 +308,13 @@ void deleteCourse(ListCourses& list, Course* course) {
 	list.size--;
 }
 void initList(ListUser& list) {
-	list.pHead = NULL;
-	list.pTail = NULL;
+	list.head = NULL;
+	list.tail = NULL;
 	list.size = 0;
 }
 void initList(ListStudent& list) {
-	list.pHead = NULL;
-	list.pTail = NULL;
+	list.head = NULL;
+	list.tail = NULL;
 	list.size = 0;
 }
 void initList(ListCourses& list) {
@@ -270,8 +330,8 @@ void initList(ListClasses& list) {
 }
 void saveListUser() {
 	ofstream fout(userDataPath);
-	fout << "ID,Password,Last name,First name,Class,Gender,Date of Birth,Staff" << endl;
-	User* curr = listUser.pHead;
+	fout << "ID,Password,Last name,First name,Class,Gender,Date of Birth,Academic year,Staff" << endl;
+	User* curr = listUser.head;
 	while (curr != NULL) {
 		string dateOfBirth = to_string(curr->dateOfBirth.day) + "/" + to_string(curr->dateOfBirth.month) + "/" + to_string(curr->dateOfBirth.year);
 		fout << curr->id << "," << curr->password << "," << curr->lastName << "," << curr->firstName
@@ -285,13 +345,13 @@ void saveListUser() {
 }
 void saveClass(string path, ListStudent listStudent) {
 	ofstream fout(path);
-	fout << "No,Student ID,Last name,First name,Gender,Date of Birth,Social ID" << endl;
-	Student* curr = listStudent.pHead;
+	fout << "No,Student ID,Last name,First name,Gender,Date of Birth,Social ID,Academic year" << endl;
+	Student* curr = listStudent.head;
 	int no = 1;
 	while (curr != NULL) {
 		string dateOfBirth = to_string(curr->dateOfBirth.day) + "/" + to_string(curr->dateOfBirth.month) + "/" + to_string(curr->dateOfBirth.year);
 		fout << no << "," << curr->studentID << "," << curr->lastName << "," << curr->firstName << "," << curr->gender
-			<< "," << dateOfBirth << "," << curr->socialID;
+			<< "," << dateOfBirth << "," << curr->socialID << curr->academicYear;
 		no++;
 		curr = curr->next;
 		if (curr != NULL) fout << endl;
@@ -433,6 +493,8 @@ void getListClasses() {
 			Class* c = new Class;
 			c->className = p.path().stem().string();
 			c->path = p.path();
+			c->next = NULL;
+			c->prev = NULL;
 			addClass(listClasses, c);
 		}
 	}

@@ -195,13 +195,14 @@ User* toUser(Student* student, string className) {
 	user->className = className;
 	user->gender = student->gender;
 	user->dateOfBirth = student->dateOfBirth;
+	user->academicYear = student->academicYear;
 	user->isStaff = false;
 	user->prev = NULL;
 	user->next = NULL;
 	return user;
 }
 void addStudentAccount(ListStudent listStudent) {
-	Student* temp = listStudent.pHead;
+	Student* temp = listStudent.head;
 	while (temp != NULL) {
 		addUser(listUser, toUser(temp, listStudent.className));
 		temp = temp->next;
@@ -239,9 +240,9 @@ void inputClassData() {
 	gotoXY(48, 14); cout << "Class: "; getline(cin, listStudent.className);
 	gotoXY(48, 15); cout << "Number of students: "; cin >> quantity;
 	cin.ignore();
-
 	year = stoi(currentSchoolYear.substr(0, 4)) - listStudent.academicYear + 1;
 	listStudent.year = studentYear(year);
+
 	system("cls");
 	width = 100;
 	height = 3;
@@ -575,7 +576,8 @@ int updateCourseOption(int curPos, Course* course) {
 		modifyCourse(course);
 		break;
 	case 2:
-		deleteCourse(course);
+		if (confirmBox()) deleteCourse(course);
+		else return 1;
 		break;
 	case 3:
 		break;

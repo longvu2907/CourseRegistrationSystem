@@ -41,8 +41,8 @@ struct User {
 	User* next;
 };
 struct ListUser {
-	User* pHead;
-	User* pTail;
+	User* head;
+	User* tail;
 	int size;
 };
 struct Student {
@@ -57,8 +57,8 @@ struct Student {
 	Student* next;
 };
 struct ListStudent {
-	Student* pHead;
-	Student* pTail;
+	Student* head;
+	Student* tail;
 	string program;
 	string className;
 	string year;
@@ -113,7 +113,9 @@ void copyFolder(string from, string to);
 void drawBox(int width, int height, int left, int top);
 void loading(string text);
 void notifyBox(string msg);
+bool confirmBox();
 void alignRow(int x, int& y, string text, int rowLength);
+void textAlignCenter(string s, int left, int width, int y);
 
 void addUser(ListUser& list, User* user);
 void addStudent(ListStudent& list, Student* student);
