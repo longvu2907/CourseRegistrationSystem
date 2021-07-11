@@ -120,6 +120,7 @@ void loginSystem() {
 	getCurrentSemester();
 	getListClasses();
 	getListCourses();
+	schoolYearPath = "./data/" + currentSchoolYear;
 	while (true) {
 		hideCursor(false);
 		loginUI();

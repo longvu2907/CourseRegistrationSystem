@@ -285,7 +285,7 @@ void addClass(ListClasses& list, Class* c) {
 	}
 	list.size++;
 }
-void deleteCourse(ListCourses& list, Course* course) {
+void removeCourse(ListCourses& list, Course* course) {
 	if (course == list.head && course == list.tail) {
 		list.head = list.tail = NULL;
 		delete course;
@@ -304,6 +304,28 @@ void deleteCourse(ListCourses& list, Course* course) {
 		course->prev->next = course->next;
 		course->next->prev = course->prev;
 		delete course;
+	}
+	list.size--;
+}
+void removeStudent(ListStudent& list, Student* student) {
+	if (student == list.head && student == list.tail) {
+		list.head = list.tail = NULL;
+		delete student;
+	}
+	else if (student == list.head) {
+		list.head = list.head->next;
+		list.head->prev = NULL;
+		delete student;
+	}
+	else if (student == list.tail) {
+		list.tail = list.tail->prev;
+		list.tail->next = NULL;
+		delete student;
+	}
+	else {
+		student->prev->next = student->next;
+		student->next->prev = student->prev;
+		delete student;
 	}
 	list.size--;
 }

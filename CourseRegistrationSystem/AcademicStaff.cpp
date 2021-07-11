@@ -18,15 +18,15 @@ int manageCoursesOption(int);
 
 void staffMenu() {
 	const int width = 40;
-	const int height = 10;
+	const int height = 12;
 	const int left = 40;
 	const int top = 8;
 
 	int curPos = 0;
 	int yPos = 10;
 	do {
-		hideCursor(true);
 		schoolYearPath = "./data/" + currentSchoolYear;
+		hideCursor(true);
 		system("cls");
 		drawBox(width, height, left, top);
 		gotoXY(55, 5); cout << "HCMUS Portal";
@@ -42,16 +42,20 @@ void staffMenu() {
 		yPos++;
 		gotoXY(52, yPos); cout << "Manage courses";
 		yPos++;
+		gotoXY(52, yPos); cout << "List of classes";
+		yPos++;
+		gotoXY(52, yPos); cout << "List of courses";
+		yPos++;
 		gotoXY(52, yPos); cout << "Setting";
 		yPos++;
 		yPos++;
 		gotoXY(52, yPos); cout << "Exit";
 		yPos = 10;
-		if (curPos == 5) yPos++;
+		if (curPos == 7) yPos++;
 		gotoXY(50, curPos + yPos); cout << cursorLeft;
 		gotoXY(75, curPos + yPos); cout << cursorRight;
 		yPos = 10;
-	} while (command(curPos, 0, 5, staffOption));
+	} while (command(curPos, 0, 7, staffOption));
 }
 
 //User Account
@@ -466,179 +470,7 @@ void manageStudent() {
 }
 
 //Manage Courses
-int updateCourseCommand(int& curPos, int minPos, int maxPos, Course* course, function<int(int, Course*)> option) {
-	int key = _getch();
-	switch (key) {
-	case 13:
-		return option(curPos, course);
-	case 224:
-		key = _getch();
-		switch (key) {
-		case 72:
-			if (curPos > minPos) curPos--;
-			else {
-				curPos = maxPos;
-			}
-			break;
-		case 80:
-			if (curPos < maxPos) curPos++;
-			else {
-				curPos = minPos;
-			}
-			break;
-		}
-	}
-	return 1;
-}
-void courseDetail(Course* course) {
-	const int width = 40;
-	const int height = 14;
-	const int left = 40;
-	const int top = 8;
-	int curPos = 0;
-	int yPos = 10;
-
-	do {
-		system("cls");
-		gotoXY(55, 5); cout << "HCMUS Portal";
-		gotoXY(55, 7); cout << "View Course";
-		drawBox(width, height, left, top);
-		alignRow(45, yPos, "Course ID: " + course->id, 32);
-		alignRow(45, yPos, "Course name: " + course->courseName, 32);
-		alignRow(45, yPos, "Teacher name: " + course->teacherName, 32);
-		alignRow(45, yPos, "Academic year: " + to_string(course->academicYear), 32);
-		alignRow(45, yPos, "Credits: " + to_string(course->credits), 32);
-		alignRow(45, yPos, "Number of student: " + to_string(course->maxStudents), 32);
-		alignRow(45, yPos, "Weekday: " + course->wDay, 32);
-		alignRow(45, yPos, "Session: " + course->session[0] + "-" + course->session[1], 32);
-		yPos++;
-		gotoXY(60, yPos); cout << "Back";
-		gotoXY(58, yPos + curPos); cout << cursorLeft;
-		gotoXY(65, curPos + yPos); cout << cursorRight;
-		yPos = 10;
-	} while (command(curPos, 0, 0, generalOption));
-
-}
-void modifyCourse(Course* course) {
-	const int width = 40;
-	const int height = 10;
-	const int left = 40;
-	const int top = 8;
-
-	system("cls");
-	string session;
-	string id = course->id;
-	gotoXY(55, 5); cout << "HCMUS Portal";
-	gotoXY(55, 7); cout << "Modify Course";
-	drawBox(width, height, left, top);
-	hideCursor(false);
-	gotoXY(45, 10); cout << "Course ID: ";
-	gotoXY(45, 11); cout << "Course name:";
-	gotoXY(45, 12); cout << "Teacher name: ";
-	gotoXY(45, 13); cout << "Number of credits: ";
-	gotoXY(45, 14); cout << "Maximum nums of student: ";
-	gotoXY(45, 15); cout << "Weekday: ";
-	gotoXY(45, 16); cout << "Session (S1,S2,S3,S4): ";
-
-	gotoXY(56, 10); getline(cin, course->id);
-	gotoXY(58, 11); getline(cin, course->courseName);
-	gotoXY(59, 12); getline(cin, course->teacherName);
-	gotoXY(64, 13); cin >> course->credits;
-	gotoXY(70, 14); cin >> course->maxStudents;
-	cin.ignore();
-	gotoXY(44, 15); getline(cin, course->wDay);
-	toUpper(course->wDay);
-	gotoXY(68, 16); getline(cin, session);
-	toUpper(session);
-	course->session[0] = session.substr(session.find('S'), 2);
-	session.erase(session.find('S'), 2);
-	course->session[1] = session.substr(session.find('S'), 2);
-	hideCursor(true);
-	fs::rename(schoolYearPath + "/semester " + to_string(currentSemester.semester)
-		+ "/courses/" + id + ".dat",
-		schoolYearPath + "/semester " + to_string(currentSemester.semester)
-		+ "/courses/" + course->id + ".dat");
-	saveCourses();
-}
-void deleteCourse(Course* course) {
-	fs::remove("./data/" + currentSchoolYear + "/semester " +
-		to_string(currentSemester.semester) + "/courses/" + course->id + ".dat");
-	deleteCourse(listCourses, course);
-}
-int updateCourseOption(int curPos, Course* course) {
-	switch (curPos)
-	{
-	case 0:
-		courseDetail(course);
-		return 1;
-		break;
-	case 1:
-		modifyCourse(course);
-		break;
-	case 2:
-		if (confirmBox()) deleteCourse(course);
-		else return 1;
-		break;
-	case 3:
-		break;
-	}
-	saveCourses();
-	return 0;
-}
-void updateCourse(Course* course) {
-	const int width = 30;
-	const int height = 8;
-	const int left = 45;
-	const int top = 8;
-	int curPos = 0;
-	int yPos = 10;
-
-	do {
-		system("cls");
-		gotoXY(55, 5); cout << "HCMUS Portal";
-		gotoXY(55, 7); cout << "Update Course";
-		drawBox(width, height, left, top);
-		gotoXY(58, yPos); cout << "Detail";
-		yPos++;
-		gotoXY(58, yPos); cout << "Modify";
-		yPos++;
-		gotoXY(58, yPos); cout << "Delete";
-		yPos++;
-		yPos++;
-		gotoXY(58, yPos); cout << "Back";
-		yPos = 10;
-		if (curPos == 3) yPos++;
-		gotoXY(56, curPos + yPos); cout << cursorLeft;
-		gotoXY(65, curPos + yPos); cout << cursorRight;
-		yPos = 10;
-	} while (updateCourseCommand(curPos, 0, 3, course, updateCourseOption));
-
-	saveCourses();
-}
-int viewCourseOption(int curPos, int page) {
-	int count = 0;
-	
-	Course* temp = listCourses.head;
-	for (int i = 0; i < (page - 1) * 10; i++) {
-		temp = temp->next;
-	}
-	Course* courseSelected = NULL;
-	while (count < 10 && temp != NULL) {
-		if (count == curPos ) {
-			courseSelected = temp;
-			break;
-		}
-		count++;
-		temp = temp->next;
-	}
-	if (courseSelected == NULL) {
-		return 0;
-	}
-	else {
-		updateCourse(courseSelected);
-	}
-	return 1;
-}
+//Create new semester, Courses registration session
 void newSemester(string semesterFolder, int semester, string startDate, string endDate) {
 
 	if (dirExists(schoolYearPath + "/" + semesterFolder)) {
@@ -757,6 +589,157 @@ void createCourseReg() {
 	saveCourses();
 	hideCursor(true);
 }
+//Update list of courses
+int updateCourseCommand(int& curPos, int minPos, int maxPos, Course* course, function<int(int, Course*)> option) {
+	int key = _getch();
+	switch (key) {
+	case 13:
+		return option(curPos, course);
+	case 224:
+		key = _getch();
+		switch (key) {
+		case 72:
+			if (curPos > minPos) curPos--;
+			else {
+				curPos = maxPos;
+			}
+			break;
+		case 80:
+			if (curPos < maxPos) curPos++;
+			else {
+				curPos = minPos;
+			}
+			break;
+		}
+	}
+	return 1;
+}
+void courseDetail(Course* course) {
+	const int width = 40;
+	const int height = 14;
+	const int left = 40;
+	const int top = 8;
+	int curPos = 0;
+	int yPos = 10;
+
+	do {
+		system("cls");
+		gotoXY(55, 5); cout << "HCMUS Portal";
+		gotoXY(55, 7); cout << "View Course";
+		drawBox(width, height, left, top);
+		alignRow(45, yPos, "Course ID: " + course->id, 32);
+		alignRow(45, yPos, "Course name: " + course->courseName, 32);
+		alignRow(45, yPos, "Teacher name: " + course->teacherName, 32);
+		alignRow(45, yPos, "Academic year: " + to_string(course->academicYear), 32);
+		alignRow(45, yPos, "Credits: " + to_string(course->credits), 32);
+		alignRow(45, yPos, "Number of student: " + to_string(course->maxStudents), 32);
+		alignRow(45, yPos, "Weekday: " + course->wDay, 32);
+		alignRow(45, yPos, "Session: " + course->session[0] + "-" + course->session[1], 32);
+		yPos++;
+		gotoXY(60, yPos); cout << "Back";
+		gotoXY(58, yPos + curPos); cout << cursorLeft;
+		gotoXY(65, curPos + yPos); cout << cursorRight;
+		yPos = 10;
+	} while (command(curPos, 0, 0, generalOption));
+
+}
+void modifyCourse(Course* course) {
+	const int width = 40;
+	const int height = 10;
+	const int left = 40;
+	const int top = 8;
+
+	system("cls");
+	string session;
+	string id = course->id;
+	gotoXY(55, 5); cout << "HCMUS Portal";
+	gotoXY(55, 7); cout << "Modify Course";
+	drawBox(width, height, left, top);
+	hideCursor(false);
+	gotoXY(45, 10); cout << "Course ID: ";
+	gotoXY(45, 11); cout << "Course name:";
+	gotoXY(45, 12); cout << "Teacher name: ";
+	gotoXY(45, 13); cout << "Number of credits: ";
+	gotoXY(45, 14); cout << "Maximum nums of student: ";
+	gotoXY(45, 15); cout << "Weekday: ";
+	gotoXY(45, 16); cout << "Session (S1,S2,S3,S4): ";
+
+	gotoXY(56, 10); getline(cin, course->id);
+	gotoXY(58, 11); getline(cin, course->courseName);
+	gotoXY(59, 12); getline(cin, course->teacherName);
+	gotoXY(64, 13); cin >> course->credits;
+	gotoXY(70, 14); cin >> course->maxStudents;
+	cin.ignore();
+	gotoXY(44, 15); getline(cin, course->wDay);
+	toUpper(course->wDay);
+	gotoXY(68, 16); getline(cin, session);
+	toUpper(session);
+	course->session[0] = session.substr(session.find('S'), 2);
+	session.erase(session.find('S'), 2);
+	course->session[1] = session.substr(session.find('S'), 2);
+	hideCursor(true);
+	fs::rename(schoolYearPath + "/semester " + to_string(currentSemester.semester)
+		+ "/courses/" + id + ".dat",
+		schoolYearPath + "/semester " + to_string(currentSemester.semester)
+		+ "/courses/" + course->id + ".dat");
+	saveCourses();
+}
+void removeCourse(Course* course) {
+	fs::remove("./data/" + currentSchoolYear + "/semester " +
+		to_string(currentSemester.semester) + "/courses/" + course->id + ".dat");
+	removeCourse(listCourses, course);
+}
+int updateCourseOption(int curPos, Course* course) {
+	switch (curPos)
+	{
+	case 0:
+		courseDetail(course);
+		return 1;
+		break;
+	case 1:
+		modifyCourse(course);
+		break;
+	case 2:
+		if (confirmBox()) removeCourse(course);
+		else return 1;
+		break;
+	case 3:
+		break;
+	}
+	saveCourses();
+	return 0;
+}
+void updateCourse(Course* course) {
+	const int width = 30;
+	const int height = 8;
+	const int left = 45;
+	const int top = 8;
+	int curPos = 0;
+	int yPos = 10;
+
+	do {
+		system("cls");
+		gotoXY(55, 5); cout << "HCMUS Portal";
+		gotoXY(55, 7); cout << "Update Course";
+		drawBox(width, height, left, top);
+		gotoXY(58, yPos); cout << "Detail";
+		yPos++;
+		gotoXY(58, yPos); cout << "Modify";
+		yPos++;
+		gotoXY(58, yPos); cout << "Delete";
+		yPos++;
+		yPos++;
+		gotoXY(58, yPos); cout << "Back";
+		yPos = 10;
+		if (curPos == 3) yPos++;
+		gotoXY(56, curPos + yPos); cout << cursorLeft;
+		gotoXY(65, curPos + yPos); cout << cursorRight;
+		yPos = 10;
+	} while (updateCourseCommand(curPos, 0, 3, course, updateCourseOption));
+
+	saveCourses();
+}
+//Input Courses
 void inputCoursesData() {
 	int width = 40;
 	int height = 8;
@@ -926,6 +909,55 @@ void addCourses() {
 
 	} while (command(curPos, 0, 2, addCoursesOption));
 }
+//Export list of student in a course, import scoreboard
+void exportListStudentInCourse(Course* course) {
+	ListStudent list = getListOfStudentInCourse(course);
+	ofstream fout("./data/exportFiles/scoreboard/" + course->id + "-scoreboard.csv");
+	fout << "No,Student Id,Full name,Total mark,Final mark,Midterm mark,Other mark" << endl;
+	int no = 1;
+	Student* temp = list.head;
+	while (temp != NULL) {
+		fout << no << "," << temp->studentID << "," << temp->lastName << " " << temp->firstName 
+			<< "," << "," << "," << "," << "," << endl;
+		temp = temp->next;
+		no++;
+	}
+	fout.close();
+}
+void importScoreBoard() {
+	string courseId;
+
+	ifstream fin("./data/exportFiles/scoreboard/" + courseId + "-scoreboard.csv");
+	string s;
+	getline(fin, s);
+
+}
+
+//View courses
+int viewCourseOption(int curPos, int page) {
+	int count = 0;
+	
+	Course* temp = listCourses.head;
+	for (int i = 0; i < (page - 1) * 10; i++) {
+		temp = temp->next;
+	}
+	Course* courseSelected = NULL;
+	while (count < 10 && temp != NULL) {
+		if (count == curPos ) {
+			courseSelected = temp;
+			break;
+		}
+		count++;
+		temp = temp->next;
+	}
+	if (courseSelected == NULL) {
+		return 0;
+	}
+	else {
+		updateCourse(courseSelected);
+	}
+	return 1;
+}
 int viewCoursesCommand(int& curPos, int minPos, int maxPos, int& page, int numberPages, function<int(int, int)> option) {
 	int key = _getch();
 	switch (key) {
@@ -1026,6 +1058,7 @@ void viewCourses() {
 		}
 	} while (viewCoursesCommand(curPos, 0, i, page, numberPages, viewCourseOption));
 }
+
 void manageCourses() {
 	const int width = 40;
 	const int height = 10;
@@ -1086,6 +1119,7 @@ void setting() {
 	cout << dateToStr(currentDate);
 	gotoXY(48, 12); cout << "(dd/mm/YYYY)";
 	gotoXY(48, 11); cout << "Change Date: "; getline(cin, date);
+	if (date == "") return;
 	currentDate = strToDate(date);
 	hideCursor(true);
 	getCurrentSchoolYear();
@@ -1132,9 +1166,15 @@ int staffOption(int curPos) {
 		manageCourses();
 		break;
 	case 4:
-		setting();
+		viewListOfClasses();
 		break;
 	case 5:
+		viewListOfCourses();
+		break;
+	case 6:
+		setting();
+		break;
+	case 7:
 		exit(0);
 		break;
 	}

@@ -4,17 +4,17 @@ ListCourses enrolledCourses;
 ListCourses posibleCourses;
 const char cursorLeft = char(175);
 const char cursorRight = char(174);
-void userAccount();
-void Profile();
+
 void coursesReg();
-void setting();
 
 Course* copyCourseData(Course* src);
 void saveEnrolledCourses();
 void getEnrolledCourses();
 void getPosibleCourses();
+void addStudentInCourses();
 ListStudent getListOfStudentInCourse(Course* course);
 void saveListCourses(ListCourses);
+void saveListOfStudentInCourse(Course* course, ListStudent list);
 int command(int&, int, int, function<int(int)>);
 int studentOption(int);
 int viewCoursesCommand(int&, int, int, int&, int, function<int(int, int)>);
@@ -64,6 +64,16 @@ void studentMenu() {
 }
 
 //Courses Registration
+void removeStudentInCourse(ListStudent& list, Student* student) {
+	Student* temp = list.head;
+	while (temp != NULL) {
+		if (temp->studentID == student->studentID) {
+			removeStudent(list, temp);
+			return;
+		}
+		temp = temp->next;
+	}
+}
 Student* toStudent(User* user) {
 	Student* student = new Student;
 	student->studentID = user->id;
@@ -134,6 +144,7 @@ int registerCoursesOption(int curPos, int maxPos, int page) {
 			loading("Saving...");
 			saveEnrolledCourses();
 			saveListCourses(posibleCourses);
+			addStudentInCourses();
 			return 0;
 		case 0:
 			return 0;
@@ -146,11 +157,8 @@ int registerCoursesOption(int curPos, int maxPos, int page) {
 		else {
 			if (courseSelected->numberRegistered >= courseSelected->maxStudents) notifyBox("This course is full");
 			else {
-				ListStudent list = getListOfStudentInCourse(courseSelected);
 				courseSelected->numberRegistered++;
 				addCourse(enrolledCourses, copyCourseData(courseSelected));
-				addStudent(list, toStudent(currentUser));
-				saveListOfStudentInCourse(courseSelected, list);
 			}
 		}
 		return 1;
@@ -290,8 +298,9 @@ int updateEnrolledListOption(int curPos, Course* course) {
 			ListStudent list = getListOfStudentInCourse(course);
 			course->numberRegistered--;
 			saveListCourses(enrolledCourses);
-			
-			deleteCourse(enrolledCourses, course);
+			removeStudentInCourse(list, toStudent(currentUser));
+			saveListOfStudentInCourse(course, list);
+			removeCourse(enrolledCourses, course);
 		}
 		else return 1;
 		break;
@@ -725,7 +734,7 @@ int viewListOfCourseOption(int curPos, int page) {
 		return 0;
 	}
 	else {
-		if (!isOnRegSession()) viewListOfStudent(courseSelected);
+		if (!isOnRegSession() || currentUser->isStaff) viewListOfStudent(courseSelected);
 		else notifyBox("Registration session has not ended");
 	}
 	return 1;
@@ -880,6 +889,7 @@ void saveListCourses(ListCourses list) {
 	saveCourses();
 }
 ListStudent getListOfStudentInCourse(Course* course) {
+	
 	ListStudent list;
 	initList(list);
 	ifstream fin("./data/" + currentSchoolYear + "/semester " +
@@ -896,10 +906,32 @@ void saveListOfStudentInCourse(Course* course, ListStudent list) {
 	ofstream fout("./data/" + currentSchoolYear + "/semester " +
 		to_string(currentSemester.semester) + "/courses/" + course->id + ".dat");
 	Student* temp = list.head;
+	int no = 1;
 	while (temp != NULL) {
-		fout << temp->studentID << "," << temp->lastName << "," << temp->firstName << "," 
-			<< "," << temp->gender << "," << dateToStr(temp->dateOfBirth) << "," << temp->socialID << "," << temp->academicYear;
+		fout << no << "," << temp->studentID << "," << temp->lastName << "," << temp->firstName << ","
+			<< temp->gender << "," << dateToStr(temp->dateOfBirth) << "," << temp->socialID << "," << temp->academicYear;
+		temp = temp->next;
 		if (temp != NULL) fout << endl;
+		no++;
 	}
 	fout.close();
+}
+bool isEnrolled(ListStudent list) {
+	Student* temp = list.head;
+	while (temp != NULL) {
+		if (temp->studentID == currentUser->id) return true;
+		temp = temp->next;
+	}
+	return false;
+}
+void addStudentInCourses() {
+	Course* temp = enrolledCourses.head;
+	while (temp != NULL) {
+		ListStudent list = getListOfStudentInCourse(temp);
+		if (!isEnrolled(list)) {
+			addStudent(list, toStudent(currentUser));
+			saveListOfStudentInCourse(temp, list);
+		}
+		temp = temp->next;
+	}
 }
