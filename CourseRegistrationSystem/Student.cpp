@@ -461,7 +461,8 @@ void coursesReg() {
 }
 
 //View classes list
-ListStudent getListOfStudent(Class* c) {
+string studentYear(int year);
+ListStudent getListOfStudentInClass(Class* c) {
 	ListStudent list;
 	initList(list);
 	ifstream fin(c->path);
@@ -484,12 +485,12 @@ void viewListOfStudent(Class* c) {
 	const int left = 33;
 	const int top = 8;
 	int curPos = 0;
-	int yPos = 13;
+	int yPos = 12;
 	int numberPages;
 	int page = 1;
 	int i = 0;
 	int no;
-	ListStudent list = getListOfStudent(c);
+	ListStudent list = getListOfStudentInClass(c);
 	do {
 		numberPages = (list.size / 10) + 1;
 		i = 0;
@@ -529,7 +530,7 @@ void viewListOfStudent(Class* c) {
 			gotoXY(59, yPos); cout << "Back";
 			gotoXY(57, curPos + yPos); cout << cursorLeft;
 			gotoXY(64, curPos + yPos); cout << cursorRight;
-			yPos = 13;
+			yPos = 12;
 		}
 		else {
 			notifyBox("Empty List...");
@@ -597,7 +598,7 @@ int viewListOfClassesOption(int curPos, int page) {
 	}
 	return 1;
 }
-void viewListOfClasses() {
+void viewListOfClasses(string year) {
 	const int width = 40;
 	int height = 6;
 	const int left = 40;
@@ -608,13 +609,14 @@ void viewListOfClasses() {
 	int page = 1;
 	int i = 0;
 
+	getListClasses(year);
 	do {
 		numberPages = (listClasses.size / 10) + 1;
 		i = 0;
 		height = 6;
 		system("cls");
 		gotoXY(55, 5); cout << "HCMUS Portal";
-		gotoXY(53, 7); cout << "List Of Classes";
+		gotoXY(52, 7); cout << year;
 		if (listClasses.head != NULL) {
 			Class* temp = listClasses.head;
 			for (int i = 0; i < (page - 1) * 10; i++) {
@@ -653,6 +655,58 @@ void viewListOfClasses() {
 		}
 	} while (viewListOfClassesCommand(curPos, 0, i, page, numberPages, viewListOfClassesOption));
 }
+int viewListOfClassesInSchoolYearOption(int curPos) {
+	switch (curPos) {
+	case 0:
+		viewListOfClasses(studentYear(1));
+		break;
+	case 1:
+		viewListOfClasses(studentYear(2));
+		break;
+	case 2:
+		viewListOfClasses(studentYear(3));
+		break;
+	case 3:
+		viewListOfClasses(studentYear(4));
+		break;
+	case 4:
+		return 0;
+		break;
+	}
+	return 1;
+}
+void viewListOfClasses() {
+	const int width = 40;
+	const int height = 10;
+	const int left = 40;
+	const int top = 8;
+
+	int curPos = 0;
+	int yPos = 10;
+	do {
+		hideCursor(true);
+		schoolYearPath = "./data/" + currentSchoolYear;
+		system("cls");
+		drawBox(width, height, left, top);
+		gotoXY(55, 5); cout << "HCMUS Portal";
+		gotoXY(53, 7); cout << "List Of Classes";
+		gotoXY(52, yPos); cout << "First-year Classes";
+		yPos++;
+		gotoXY(52, yPos); cout << "Second-year Classes";
+		yPos++;
+		gotoXY(52, yPos); cout << "Third-year Classes";
+		yPos++;
+		gotoXY(52, yPos); cout << "Final-year Classes";
+		yPos++;
+		yPos++;
+		gotoXY(52, yPos); cout << "Back";
+		yPos = 10;
+		if (curPos == 4) yPos++;
+		gotoXY(50, curPos + yPos); cout << cursorLeft;
+		gotoXY(76, curPos + yPos); cout << cursorRight;
+		yPos = 10;
+	} while (command(curPos, 0, 4, viewListOfClassesInSchoolYearOption));
+}
 
 //View courses list
 void viewListOfStudent(Course* c) {
@@ -661,7 +715,7 @@ void viewListOfStudent(Course* c) {
 	const int left = 33;
 	const int top = 8;
 	int curPos = 0;
-	int yPos = 13;
+	int yPos = 12;
 	int numberPages;
 	int page = 1;
 	int i = 0;
@@ -706,7 +760,7 @@ void viewListOfStudent(Course* c) {
 			gotoXY(59, yPos); cout << "Back";
 			gotoXY(57, curPos + yPos); cout << cursorLeft;
 			gotoXY(64, curPos + yPos); cout << cursorRight;
-			yPos = 13;
+			yPos = 12;
 		}
 		else {
 			notifyBox("Empty List...");
@@ -800,7 +854,6 @@ void viewListOfCourses() {
 		}
 	} while (viewListOfClassesCommand(curPos, 0, i, page, numberPages, viewListOfCourseOption));
 }
-
 int studentOption(int curPos) {
 	switch (curPos) {
 	case 0:
@@ -889,7 +942,6 @@ void saveListCourses(ListCourses list) {
 	saveCourses();
 }
 ListStudent getListOfStudentInCourse(Course* course) {
-	
 	ListStudent list;
 	initList(list);
 	ifstream fin("./data/" + currentSchoolYear + "/semester " +

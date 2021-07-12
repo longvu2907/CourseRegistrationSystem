@@ -152,11 +152,11 @@ bool confirmBox() {
 	{
 		system("cls");
 		gotoXY(57, 7); cout << "CONFIRM";
-		textAlignCenter("ARE YOU SURE ?", left, width, yPos);
+		textAlignCenter("Are you sure", left, width, yPos);
 		drawBox(width, height, left, top);
 		yPos += 2;
-		gotoXY(50, yPos); cout << "YES!";
-		gotoXY(70, yPos); cout << "NO";
+		gotoXY(50, yPos); cout << "Yes";
+		gotoXY(70, yPos); cout << "No";
 		if (curPos == 0) {
 			gotoXY(48, yPos); cout << char(175);
 			gotoXY(55, yPos); cout << char(174);
@@ -504,9 +504,9 @@ void getListCourses() {
 		addCourse(listCourses, convertCourseData(fin));
 	}
 }
-void getListClasses() {
+void getListClasses(string year) {
 	initList(listClasses);
-	string path = "./data/" + currentSchoolYear + "/classes/";
+	string path = "./data/" + currentSchoolYear + "/classes/" + year + "/";
 
 	std::string ext(".csv");
 	for (auto& p : fs::recursive_directory_iterator(path))

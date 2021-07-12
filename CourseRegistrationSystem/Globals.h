@@ -45,6 +45,12 @@ struct ListUser {
 	User* tail;
 	int size;
 };
+struct Score {
+	float otherMark = 0;
+	float midtermMark = 0;
+	float finalMark = 0;
+	float totalMark = 0;
+};
 struct Student {
 	string studentID;
 	string lastName;
@@ -53,6 +59,7 @@ struct Student {
 	string socialID;
 	Date dateOfBirth;
 	int academicYear;
+	Score score;
 	Student* prev;
 	Student* next;
 };
@@ -137,7 +144,7 @@ void initList(ListClasses& list);
 bool isExpired(Date currentDate, Date endDate);
 bool isOnRegSession();
 void getListCourses();
-void getListClasses();
+void getListClasses(string year);
 void getCurrentDate();
 void getCurrentSchoolYear();
 void getCurrentSemester();

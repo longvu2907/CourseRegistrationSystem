@@ -18,7 +18,7 @@ int manageCoursesOption(int);
 
 void staffMenu() {
 	const int width = 40;
-	const int height = 12;
+	const int height = 10;
 	const int left = 40;
 	const int top = 8;
 
@@ -42,20 +42,16 @@ void staffMenu() {
 		yPos++;
 		gotoXY(52, yPos); cout << "Manage courses";
 		yPos++;
-		gotoXY(52, yPos); cout << "List of classes";
-		yPos++;
-		gotoXY(52, yPos); cout << "List of courses";
-		yPos++;
 		gotoXY(52, yPos); cout << "Setting";
 		yPos++;
 		yPos++;
 		gotoXY(52, yPos); cout << "Exit";
 		yPos = 10;
-		if (curPos == 7) yPos++;
+		if (curPos == 5) yPos++;
 		gotoXY(50, curPos + yPos); cout << cursorLeft;
 		gotoXY(75, curPos + yPos); cout << cursorRight;
 		yPos = 10;
-	} while (command(curPos, 0, 7, staffOption));
+	} while (command(curPos, 0, 5, staffOption));
 }
 
 //User Account
@@ -74,12 +70,12 @@ void changePassword() {
 		gotoXY(55, 5); cout << "HCMUS Portal";
 		gotoXY(53, 7); cout << "Change Password";
 		drawBox(width, height, left, top);
-		gotoXY(45, yPos); cout << "Enter old password: ";
+		gotoXY(45, yPos); cout << "Current password: ";
 		yPos++;
 		yPos++;
 		getline(cin, currentPassword);
 		if (currentPassword == currentUser->password) {
-			gotoXY(45, yPos); cout << "Enter new password: ";
+			gotoXY(45, yPos); cout << "New password: ";
 			yPos++;
 			getline(cin, currentUser->password);
 			notifyBox("Successful");
@@ -176,16 +172,16 @@ string studentYear(int year) {
 	string s;
 	switch (year) {
 	case 1:
-		s = "first-year student";
+		s = "first-year classes";
 		break;
 	case 2:
-		s = "second-year student";
+		s = "second-year classes";
 		break;
 	case 3:
-		s = "third-year student";
+		s = "third-year classes";
 		break;
 	default:
-		s = "final-year student";
+		s = "final-year classes";
 		break;
 	}
 	return s;
@@ -403,33 +399,33 @@ void newSchoolYear() {
 		ofstream(schoolYearPath + "/semester.txt");
 		prevSchoolYearPath += "/classes";
 		copyFolder(prevSchoolYearPath, classesPath);
-		fs::remove_all(classesPath + "/final-year student");
-		fs::rename(classesPath + "/third-year student", classesPath + "/final-year student");
-		fs::rename(classesPath + "/second-year student", classesPath + "/third-year student");
-		fs::rename(classesPath + "/first-year student", classesPath + "/second-year student");
-		fs::create_directories(classesPath + "/first-year student/APCS");
-		fs::create_directories(classesPath + "/first-year student/CTT");
-		fs::create_directories(classesPath + "/first-year student/CLC");
-		fs::create_directories(classesPath + "/first-year student/VP");
+		fs::remove_all(classesPath + "/final-year classes");
+		fs::rename(classesPath + "/third-year classes", classesPath + "/final-year classes");
+		fs::rename(classesPath + "/second-year classes", classesPath + "/third-year classes");
+		fs::rename(classesPath + "/first-year classes", classesPath + "/second-year classes");
+		fs::create_directories(classesPath + "/first-year classes/APCS");
+		fs::create_directories(classesPath + "/first-year classes/CTT");
+		fs::create_directories(classesPath + "/first-year classes/CLC");
+		fs::create_directories(classesPath + "/first-year classes/VP");
 	}
 	else {
 		ofstream(schoolYearPath + "/semester.txt");
-		fs::create_directories(classesPath + "/first-year student/APCS");
-		fs::create_directories(classesPath + "/first-year student/CTT");
-		fs::create_directories(classesPath + "/first-year student/CLC");
-		fs::create_directories(classesPath + "/first-year student/VP");
-		fs::create_directories(classesPath + "/second-year student/APCS");
-		fs::create_directories(classesPath + "/second-year student/CTT");
-		fs::create_directories(classesPath + "/second-year student/CLC");
-		fs::create_directories(classesPath + "/second-year student/VP");
-		fs::create_directories(classesPath + "/third-year student/APCS");
-		fs::create_directories(classesPath + "/third-year student/CTT");
-		fs::create_directories(classesPath + "/third-year student/CLC");
-		fs::create_directories(classesPath + "/third-year student/VP");
-		fs::create_directories(classesPath + "/final-year student/APCS");
-		fs::create_directories(classesPath + "/final-year student/CTT");
-		fs::create_directories(classesPath + "/final-year student/CLC");
-		fs::create_directories(classesPath + "/final-year student/VP");
+		fs::create_directories(classesPath + "/first-year classes/APCS");
+		fs::create_directories(classesPath + "/first-year classes/CTT");
+		fs::create_directories(classesPath + "/first-year classes/CLC");
+		fs::create_directories(classesPath + "/first-year classes/VP");
+		fs::create_directories(classesPath + "/second-year classes/APCS");
+		fs::create_directories(classesPath + "/second-year classes/CTT");
+		fs::create_directories(classesPath + "/second-year classes/CLC");
+		fs::create_directories(classesPath + "/second-year classes/VP");
+		fs::create_directories(classesPath + "/third-year classes/APCS");
+		fs::create_directories(classesPath + "/third-year classes/CTT");
+		fs::create_directories(classesPath + "/third-year classes/CLC");
+		fs::create_directories(classesPath + "/third-year classes/VP");
+		fs::create_directories(classesPath + "/final-year classes/APCS");
+		fs::create_directories(classesPath + "/final-year classes/CTT");
+		fs::create_directories(classesPath + "/final-year classes/CLC");
+		fs::create_directories(classesPath + "/final-year classes/VP");
 	}
 }
 void createSchoolYear() {
@@ -444,7 +440,7 @@ void createSchoolYear() {
 }
 void manageStudent() {
 	const int width = 40;
-	const int height = 10;
+	const int height = 11;
 	const int left = 40;
 	const int top = 8;
 	int curPos = 0;
@@ -455,18 +451,20 @@ void manageStudent() {
 		drawBox(width, height, left, top);
 		gotoXY(55, 5); cout << "HCMUS Portal";
 		gotoXY(55, 7); cout << "Manage Student";
-		gotoXY(52, yPos); cout << "Create school year";
+		gotoXY(52, yPos); cout << "Create School Year";
 		yPos++;
-		gotoXY(52, yPos); cout << "Create classes";
+		gotoXY(52, yPos); cout << "Create Classes";
+		yPos++;
+		gotoXY(52, yPos); cout << "List Of Classes";
 		yPos++;
 		yPos++;
 		gotoXY(52, yPos); cout << "Back";
 		yPos = 10;
-		if (curPos == 2) yPos++;
+		if (curPos == 3) yPos++;
 		gotoXY(50, curPos + yPos); cout << cursorLeft;
 		gotoXY(72, curPos + yPos); cout << cursorRight;
 		yPos = 10;
-	} while (command(curPos, 0, 2, manageStudentOption));
+	} while (command(curPos, 0, 3, manageStudentOption));
 }
 
 //Manage Courses
@@ -589,7 +587,164 @@ void createCourseReg() {
 	saveCourses();
 	hideCursor(true);
 }
+//Export list of student in a course, import scoreboard
+int viewListOfClassesCommand(int& curPos, int minPos, int maxPos, int& page, int numberPages, function<int(int, int)> option);
+int viewListOfCourseOption(int curPos, int page);
+ListStudent getListOfStudentInCourse(Course* c);
+void exportListStudentInCourse(Course* course) {
+	ListStudent list = getListOfStudentInCourse(course);
+	if (list.head == NULL) {
+		notifyBox("Empty List...");
+		return;
+	}
+	ofstream fout("./data/exportFiles/scoreboard/" + course->id + "-scoreboard.csv");
+	fout << "No,Student Id,Full name,Other mark,Midterm mark,Final mark,Total mark" << endl;
+	int no = 1;
+	Student* temp = list.head;
+	while (temp != NULL) {
+		fout << no << "," << temp->studentID << "," << temp->lastName << " " << temp->firstName
+			<< "," << "," << "," << "," << "," << endl;
+		temp = temp->next;
+		no++;
+	}
+	fout.close();
+}
+void importScoreboard(Course* course) {
+	string src = "./data/importFiles/scoreboard/" + course->id + "-scoreboard.csv";
+	ifstream fin(src);
+	if (fin.fail()) notifyBox("The scoreboard of course does not exist");
+	else {
+		string dest = "./data/" + currentSchoolYear + "/semester " +
+			to_string(currentSemester.semester) + "/courses/" + course->id + "-scoreboard.dat";
+		fs::copy(src, dest);
+	}
+	fin.close();
+}
+Student* getScoreboard(ifstream& data) {
+	string s;
+	Student* newStudent = new Student;
+	getline(data, s, ',');
+	if (s == "") return NULL;
+	getline(data, newStudent->studentID, ',');
+	string fullName;
+	getline(data, fullName, ',');
+	newStudent->lastName = fullName.substr(0, fullName.find_last_of(' '));
+	newStudent->firstName = fullName.substr(fullName.find_last_of(' '));
+	Score score;
+	string mark;
+	getline(data, mark, ',');
+	if (mark == "") {
+		score.otherMark = 0;
+		score.midtermMark = 0;
+		score.finalMark = 0;
+		score.totalMark = 0;
+		getline(data, mark, '\n');
+
+	}
+	else {
+		score.otherMark = stof(mark);
+		getline(data, mark, ',');
+		score.midtermMark = stof(mark);
+		getline(data, mark, ',');
+		score.finalMark = stof(mark);
+		getline(data, mark, '\n');
+		score.totalMark = stof(mark);
+	}
+	return newStudent;
+}
+ListStudent getListOfStudentScoreboard(Course* course) {
+	ListStudent list;
+	initList(list);
+	ifstream fin("./data/" + currentSchoolYear + "/semester " +
+		to_string(currentSemester.semester) + "/courses/" + course->id + "-scoreboard.dat");
+	if (fin.fail()) {
+		return list;
+	}
+	string s;
+	getline(fin, s);
+	while (!fin.eof()) {
+		addStudent(list, getScoreboard(fin));
+	}
+	fin.close();
+	return list;
+}
+void viewScoreboard(Course* course) {
+	const int width = 60;
+	int height = 8;
+	const int left = 30;
+	const int top = 8;
+	int curPos = 0;
+	int yPos = 12;
+	int numberPages;
+	int page = 1;
+	int i = 0;
+	int no;
+
+	do {
+		ListStudent list = getListOfStudentScoreboard(course);
+		numberPages = (list.size / 10) + 1;
+		i = 0;
+		height = 8;
+		system("cls");
+		gotoXY(55, 5); cout << "HCMUS Portal";
+		gotoXY(55, 6); cout << "Scoreboard";
+		textAlignCenter(course->courseName, 40, 40, 7);
+		gotoXY(33, 10); cout << "No";
+		gotoXY(38, 10); cout << "ID";
+		gotoXY(48, 10); cout << "Full name";
+		gotoXY(65, 10); cout << "Other";
+		gotoXY(72, 10); cout << "Midterm";
+		gotoXY(81, 10); cout << "Final";
+		gotoXY(88, 10); cout << "Total";
+		if (listCourses.head != NULL) {
+			Student* temp = list.head;
+			for (int i = 0; i < (page - 1) * 10; i++) {
+				temp = temp->next;
+			}
+			while (i < 10 && temp != NULL) {
+				no = (page - 1) * 10 + i + 1;
+				gotoXY(33, yPos); cout << no;
+				gotoXY(38, yPos); cout << temp->studentID;
+				string fullName = temp->lastName + " " + temp->firstName;
+				if (fullName.length() > 27) fullName = fullName.substr(0, 27);
+				gotoXY(48, yPos); cout << fullName;
+				gotoXY(65, yPos); cout << temp->score.otherMark;
+				gotoXY(72, yPos); cout << temp->score.midtermMark;
+				gotoXY(81, yPos); cout << temp->score.finalMark;
+				gotoXY(88, yPos); cout << temp->score.totalMark;
+				yPos++;
+				i++;
+				temp = temp->next;
+			}
+			height += i;
+			drawBox(width, height, left, top);
+			yPos++;
+			gotoXY(58, yPos);
+			if (page > 1) cout << char(174);
+			cout << char(174) << "  " << page << "  " << char(175);
+			if (page < numberPages) cout << char(175);
+			yPos++;
+			gotoXY(59, yPos); cout << "Back";
+			yPos = 12;
+			if (curPos == i) {
+				yPos += 2;
+				gotoXY(57, curPos + yPos); cout << cursorLeft;
+				gotoXY(64, curPos + yPos); cout << cursorRight;
+			}
+			else {
+				gotoXY(41, curPos + yPos); cout << cursorLeft;
+				gotoXY(80, curPos + yPos); cout << cursorRight;
+			}
+			yPos = 12;
+		}
+		else {
+			notifyBox("Empty List...");
+			return;
+		}
+	} while (viewListOfClassesCommand(curPos, 0, i, page, numberPages, viewListOfCourseOption));
+}
 //Update list of courses
+void viewListOfStudent(Course* c);
 int updateCourseCommand(int& curPos, int minPos, int maxPos, Course* course, function<int(int, Course*)> option) {
 	int key = _getch();
 	switch (key) {
@@ -698,12 +853,29 @@ int updateCourseOption(int curPos, Course* course) {
 		break;
 	case 1:
 		modifyCourse(course);
+		if (!confirmBox()) return 1;
 		break;
 	case 2:
 		if (confirmBox()) removeCourse(course);
 		else return 1;
 		break;
 	case 3:
+		viewListOfStudent(course);
+		return 1;
+		break;
+	case 4:
+		loading("Exporting...");
+		exportListStudentInCourse(course);
+		return 1;
+		break;
+	case 5:
+		loading("Importing...");
+		importScoreboard(course);
+		break;
+	case 6:
+		viewScoreboard(course);
+		break;
+	case 7:
 		break;
 	}
 	saveCourses();
@@ -711,7 +883,7 @@ int updateCourseOption(int curPos, Course* course) {
 }
 void updateCourse(Course* course) {
 	const int width = 30;
-	const int height = 8;
+	const int height = 12;
 	const int left = 45;
 	const int top = 8;
 	int curPos = 0;
@@ -728,14 +900,28 @@ void updateCourse(Course* course) {
 		yPos++;
 		gotoXY(58, yPos); cout << "Delete";
 		yPos++;
+		textAlignCenter("List Of Student", 45, 30, yPos);
+		yPos++;
+		textAlignCenter("Export List Of Student", 45, 30, yPos);
+		yPos++;
+		textAlignCenter("Import Scoreboard", 45, 30, yPos);
+		yPos++;
+		textAlignCenter("View Scoreboard", 45, 30, yPos);
+		yPos++;
 		yPos++;
 		gotoXY(58, yPos); cout << "Back";
 		yPos = 10;
-		if (curPos == 3) yPos++;
-		gotoXY(56, curPos + yPos); cout << cursorLeft;
-		gotoXY(65, curPos + yPos); cout << cursorRight;
+		if (curPos == 7) yPos++;
+		if (curPos < 3 || curPos == 7) {
+			gotoXY(56, curPos + yPos); cout << cursorLeft;
+			gotoXY(65, curPos + yPos); cout << cursorRight;
+		}
+		else {
+			gotoXY(48, curPos + yPos); cout << cursorLeft;
+			gotoXY(73, curPos + yPos); cout << cursorRight;
+		}
 		yPos = 10;
-	} while (updateCourseCommand(curPos, 0, 3, course, updateCourseOption));
+	} while (updateCourseCommand(curPos, 0, 7, course, updateCourseOption));
 
 	saveCourses();
 }
@@ -909,30 +1095,6 @@ void addCourses() {
 
 	} while (command(curPos, 0, 2, addCoursesOption));
 }
-//Export list of student in a course, import scoreboard
-void exportListStudentInCourse(Course* course) {
-	ListStudent list = getListOfStudentInCourse(course);
-	ofstream fout("./data/exportFiles/scoreboard/" + course->id + "-scoreboard.csv");
-	fout << "No,Student Id,Full name,Total mark,Final mark,Midterm mark,Other mark" << endl;
-	int no = 1;
-	Student* temp = list.head;
-	while (temp != NULL) {
-		fout << no << "," << temp->studentID << "," << temp->lastName << " " << temp->firstName 
-			<< "," << "," << "," << "," << "," << endl;
-		temp = temp->next;
-		no++;
-	}
-	fout.close();
-}
-void importScoreBoard() {
-	string courseId;
-
-	ifstream fin("./data/exportFiles/scoreboard/" + courseId + "-scoreboard.csv");
-	string s;
-	getline(fin, s);
-
-}
-
 //View courses
 int viewCourseOption(int curPos, int page) {
 	int count = 0;
@@ -1058,7 +1220,6 @@ void viewCourses() {
 		}
 	} while (viewCoursesCommand(curPos, 0, i, page, numberPages, viewCourseOption));
 }
-
 void manageCourses() {
 	const int width = 40;
 	const int height = 10;
@@ -1090,7 +1251,7 @@ void manageCourses() {
 		}
 		gotoXY(50, yPos); cout << "Add Courses";
 		yPos++;
-		gotoXY(50, yPos); cout << "View List Courses";
+		gotoXY(50, yPos); cout << "List Of Courses";
 		yPos++;
 		yPos++;
 		gotoXY(50, yPos); cout << "Back";
@@ -1166,15 +1327,9 @@ int staffOption(int curPos) {
 		manageCourses();
 		break;
 	case 4:
-		viewListOfClasses();
-		break;
-	case 5:
-		viewListOfCourses();
-		break;
-	case 6:
 		setting();
 		break;
-	case 7:
+	case 5:
 		exit(0);
 		break;
 	}
@@ -1213,6 +1368,9 @@ int manageStudentOption(int curPos) {
 		createClasses();
 		break;
 	case 2:
+		viewListOfClasses();
+		break;
+	case 3:
 		return 0;
 		break;
 	}
