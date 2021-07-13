@@ -45,11 +45,16 @@ struct ListUser {
 	User* tail;
 	int size;
 };
-struct Score {
+struct CourseMark {
 	float otherMark = 0;
 	float midtermMark = 0;
 	float finalMark = 0;
 	float totalMark = 0;
+};
+struct SemesterMark{
+	float finalMarkOfCourses[5];
+	float GPA = 0;
+	float overallGPA = 0;
 };
 struct Student {
 	string studentID;
@@ -59,7 +64,9 @@ struct Student {
 	string socialID;
 	Date dateOfBirth;
 	int academicYear;
-	Score score;
+	ListCourses enrolledCourses;
+	CourseMark courseMark;
+	SemesterMark semesterMark;
 	Student* prev;
 	Student* next;
 };

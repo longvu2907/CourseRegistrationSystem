@@ -587,9 +587,7 @@ void createCourseReg() {
 	saveCourses();
 	hideCursor(true);
 }
-//Export list of student in a course, import scoreboard
-int viewListOfClassesCommand(int& curPos, int minPos, int maxPos, int& page, int numberPages, function<int(int, int)> option);
-int viewListOfCourseOption(int curPos, int page);
+//Scoreboard In Course
 ListStudent getListOfStudentInCourse(Course* c);
 void exportListStudentInCourse(Course* course) {
 	ListStudent list = getListOfStudentInCourse(course);
@@ -603,7 +601,7 @@ void exportListStudentInCourse(Course* course) {
 	Student* temp = list.head;
 	while (temp != NULL) {
 		fout << no << "," << temp->studentID << "," << temp->lastName << " " << temp->firstName
-			<< "," << "," << "," << "," << "," << endl;
+			<< "," << "," << "," << "," << endl;
 		temp = temp->next;
 		no++;
 	}
@@ -629,27 +627,25 @@ Student* getScoreboard(ifstream& data) {
 	string fullName;
 	getline(data, fullName, ',');
 	newStudent->lastName = fullName.substr(0, fullName.find_last_of(' '));
-	newStudent->firstName = fullName.substr(fullName.find_last_of(' '));
-	Score score;
+	newStudent->firstName = fullName.substr(fullName.find_last_of(' ') + 1);
+	CourseMark courseMark;
 	string mark;
 	getline(data, mark, ',');
 	if (mark == "") {
-		score.otherMark = 0;
-		score.midtermMark = 0;
-		score.finalMark = 0;
-		score.totalMark = 0;
 		getline(data, mark, '\n');
-
 	}
 	else {
-		score.otherMark = stof(mark);
+		courseMark.otherMark = stof(mark);
 		getline(data, mark, ',');
-		score.midtermMark = stof(mark);
+		courseMark.midtermMark = stof(mark);
 		getline(data, mark, ',');
-		score.finalMark = stof(mark);
+		courseMark.finalMark = stof(mark);
 		getline(data, mark, '\n');
-		score.totalMark = stof(mark);
+		courseMark.totalMark = stof(mark);
 	}
+	newStudent->courseMark = courseMark;
+	newStudent->prev = NULL;
+	newStudent->next = NULL;
 	return newStudent;
 }
 ListStudent getListOfStudentScoreboard(Course* course) {
@@ -668,10 +664,191 @@ ListStudent getListOfStudentScoreboard(Course* course) {
 	fin.close();
 	return list;
 }
-void viewScoreboard(Course* course) {
-	const int width = 60;
+void saveScoreboard(ListStudent list, Course course) {
+	ofstream fout("./data/" + currentSchoolYear + "/semester " 
+		+ to_string(currentSemester.semester) + "/courses/" + course.id + "-scoreboard.dat");
+	fout << "No,Student Id,Full name,Other mark,Midterm mark,Final mark,Total mark" << endl;
+	int no = 1;
+	Student* temp = list.head;
+	while (temp != NULL) {
+		fout << no << "," << temp->studentID << "," << temp->lastName << " " << temp->firstName
+			<< "," << temp->courseMark.otherMark << "," << temp->courseMark.midtermMark << "," 
+			<< temp->courseMark.finalMark << ","  << temp->courseMark.totalMark << endl;
+		temp = temp->next;
+		no++;
+	}
+	fout.close();
+}
+void updateStudentResult(Student* student) {
+	const int width = 30;
 	int height = 8;
-	const int left = 30;
+	const int left = 45;
+	const int top = 8;
+	int curPos = 0;
+
+	hideCursor(false);
+	system("cls");
+	textAlignCenter("HCMUS Portal", left, width, 5);
+	textAlignCenter("Update Student Result", left, width, 7);
+	drawBox(width, height, left, top);
+	textAlignCenter(student->lastName + " " + student->firstName, left, width, 9);
+	gotoXY(50, 11); cout << "Other Mark: "; cin >> student->courseMark.otherMark;
+	gotoXY(50, 12); cout << "Midterm Mark: "; cin >> student->courseMark.midtermMark;
+	gotoXY(50, 13); cout << "Final Mark: "; cin >> student->courseMark.finalMark;
+	gotoXY(50, 14); cout << "Total Mark: "; cin >> student->courseMark.totalMark;
+	hideCursor(true);
+}
+int viewScoreboardCommand(int& curPos, int minPos, int maxPos, ListStudent list, Course course,
+	int& page, int numberPages, function<int(int, int, ListStudent, Course)> option) {
+	int key = _getch();
+	switch (key) {
+	case 13:
+		return option(curPos, page, list, course);
+	case 224:
+		key = _getch();
+		switch (key) {
+		case 72://up key
+			if (curPos > minPos) curPos--;
+			else {
+				curPos = maxPos;
+			}
+			break;
+		case 80://down key
+			if (curPos < maxPos) curPos++;
+			else {
+				curPos = minPos;
+			}
+			break;
+		case 75://left key
+			if (page > 1) {
+				page--;
+				curPos = 0;
+			}
+			break;
+		case 77://right key
+			if (page < numberPages) {
+				page++;
+				curPos = 0;
+			}
+			break;
+		}
+	}
+	return 1;
+}
+int viewScoreboardOption(int curPos, int page, ListStudent list, Course course) {
+	int count = 0;
+
+	Student* temp = list.head;
+	for (int i = 0; i < (page - 1) * 10; i++) {
+		temp = temp->next;
+	}
+	Student* studentSelected = NULL;
+	while (count < 10 && temp != NULL) {
+		if (count == curPos) {
+			studentSelected = temp;
+			break;
+		}
+		count++;
+		temp = temp->next;
+	}
+	if (studentSelected == NULL) {
+		int n = count - curPos;
+		switch (n) {
+		case 0:
+			loading("Saving...");
+			saveScoreboard(list, course);
+			return 0;
+		}
+		return 0;
+	}
+	else {
+		updateStudentResult(studentSelected);
+	}
+	return 1;
+}
+void viewScoreboard(Course* course) {
+	const int width = 64;
+	int height = 10;
+	const int left = 28;
+	const int top = 8;
+	int curPos = 0;
+	int yPos = 13;
+	int numberPages;
+	int page = 1;
+	int i = 0;
+	int no;
+	ListStudent list = getListOfStudentScoreboard(course);
+	do {
+		numberPages = (list.size / 10) + 1;
+		i = 0;
+		height = 10;
+		system("cls");
+		gotoXY(55, 5); cout << "HCMUS Portal";
+		gotoXY(56, 7); cout << "Scoreboard";
+		textAlignCenter(course->courseName, 40, 40, 9);
+		gotoXY(31, 11); cout << "No";
+		gotoXY(36, 11); cout << "ID";
+		gotoXY(45, 11); cout << "Full name";
+		gotoXY(63, 11); cout << "Other";
+		gotoXY(70, 11); cout << "Midterm";
+		gotoXY(79, 11); cout << "Final";
+		gotoXY(86, 11); cout << "Total";
+		if (list.head != NULL) {
+			Student* temp = list.head;
+			for (int i = 0; i < (page - 1) * 10; i++) {
+				temp = temp->next;
+			}
+			while (i < 10 && temp != NULL) {
+				no = (page - 1) * 10 + i + 1;
+				gotoXY(31, yPos); cout << no;
+				gotoXY(36, yPos); cout << temp->studentID;
+				string fullName = temp->lastName + " " + temp->firstName;
+				if (fullName.length() > 27) fullName = fullName.substr(0, 27);
+				gotoXY(45, yPos); cout << fullName;
+				gotoXY(63, yPos); cout << temp->courseMark.otherMark;
+				gotoXY(70, yPos); cout << temp->courseMark.midtermMark;
+				gotoXY(79, yPos); cout << temp->courseMark.finalMark;
+				gotoXY(86, yPos); cout << temp->courseMark.totalMark;
+				yPos++;
+				i++;
+				temp = temp->next;
+			}
+			height += i;
+			drawBox(width, height, left, top);
+			yPos++;
+			gotoXY(58, yPos);
+			if (page > 1) cout << char(174);
+			cout << char(174) << "  " << page << "  " << char(175);
+			if (page < numberPages) cout << char(175);
+			yPos++; 
+			gotoXY(59, yPos); cout << "Save";
+			yPos++;
+			gotoXY(59, yPos); cout << "Back";
+			yPos = 13;
+			if (curPos == i || curPos == i + 1) {
+				yPos += 2;
+				gotoXY(57, curPos + yPos); cout << cursorLeft;
+				gotoXY(64, curPos + yPos); cout << cursorRight;
+			}
+			else {
+				gotoXY(29, curPos + yPos); cout << cursorLeft;
+				gotoXY(92, curPos + yPos); cout << cursorRight;
+			}
+			yPos = 13;
+		}
+		else {
+			notifyBox("Empty List...");
+			return;
+		}
+	} while (viewScoreboardCommand(curPos, 0, i + 1, list, *course, page, numberPages, viewScoreboardOption));
+}
+
+//Scoreboard In Class
+ListStudent getListOfStudentInClass(Class* c);
+void viewScoreboard(Class* c) {
+	const int width = 64;
+	int height = 10;
+	const int left = 28;
 	const int top = 8;
 	int curPos = 0;
 	int yPos = 12;
@@ -679,39 +856,38 @@ void viewScoreboard(Course* course) {
 	int page = 1;
 	int i = 0;
 	int no;
-
+	ListStudent list = getListOfStudentInClass(c);
 	do {
-		ListStudent list = getListOfStudentScoreboard(course);
 		numberPages = (list.size / 10) + 1;
 		i = 0;
-		height = 8;
+		height = 10;
 		system("cls");
 		gotoXY(55, 5); cout << "HCMUS Portal";
-		gotoXY(55, 6); cout << "Scoreboard";
-		textAlignCenter(course->courseName, 40, 40, 7);
-		gotoXY(33, 10); cout << "No";
-		gotoXY(38, 10); cout << "ID";
-		gotoXY(48, 10); cout << "Full name";
-		gotoXY(65, 10); cout << "Other";
-		gotoXY(72, 10); cout << "Midterm";
-		gotoXY(81, 10); cout << "Final";
-		gotoXY(88, 10); cout << "Total";
-		if (listCourses.head != NULL) {
+		gotoXY(56, 7); cout << "Scoreboard";
+		textAlignCenter(c->className, 40, 40, 9);
+		gotoXY(31, 11); cout << "No";
+		gotoXY(36, 11); cout << "ID";
+		gotoXY(45, 11); cout << "Full name";
+		gotoXY(63, 11); cout << "Other";
+		gotoXY(70, 11); cout << "Midterm";
+		gotoXY(79, 11); cout << "Final";
+		gotoXY(86, 11); cout << "Total";
+		if (list.head != NULL) {
 			Student* temp = list.head;
 			for (int i = 0; i < (page - 1) * 10; i++) {
 				temp = temp->next;
 			}
 			while (i < 10 && temp != NULL) {
 				no = (page - 1) * 10 + i + 1;
-				gotoXY(33, yPos); cout << no;
-				gotoXY(38, yPos); cout << temp->studentID;
+				gotoXY(31, yPos); cout << no;
+				gotoXY(36, yPos); cout << temp->studentID;
 				string fullName = temp->lastName + " " + temp->firstName;
 				if (fullName.length() > 27) fullName = fullName.substr(0, 27);
-				gotoXY(48, yPos); cout << fullName;
-				gotoXY(65, yPos); cout << temp->score.otherMark;
-				gotoXY(72, yPos); cout << temp->score.midtermMark;
-				gotoXY(81, yPos); cout << temp->score.finalMark;
-				gotoXY(88, yPos); cout << temp->score.totalMark;
+				gotoXY(45, yPos); cout << fullName;
+				gotoXY(63, yPos); cout << temp->courseMark.otherMark;
+				gotoXY(70, yPos); cout << temp->courseMark.midtermMark;
+				gotoXY(79, yPos); cout << temp->courseMark.finalMark;
+				gotoXY(86, yPos); cout << temp->courseMark.totalMark;
 				yPos++;
 				i++;
 				temp = temp->next;
@@ -724,25 +900,28 @@ void viewScoreboard(Course* course) {
 			cout << char(174) << "  " << page << "  " << char(175);
 			if (page < numberPages) cout << char(175);
 			yPos++;
+			gotoXY(59, yPos); cout << "Save";
+			yPos++;
 			gotoXY(59, yPos); cout << "Back";
-			yPos = 12;
-			if (curPos == i) {
+			yPos = 13;
+			if (curPos == i || curPos == i + 1) {
 				yPos += 2;
 				gotoXY(57, curPos + yPos); cout << cursorLeft;
 				gotoXY(64, curPos + yPos); cout << cursorRight;
 			}
 			else {
-				gotoXY(41, curPos + yPos); cout << cursorLeft;
-				gotoXY(80, curPos + yPos); cout << cursorRight;
+				gotoXY(29, curPos + yPos); cout << cursorLeft;
+				gotoXY(92, curPos + yPos); cout << cursorRight;
 			}
-			yPos = 12;
+			yPos = 13;
 		}
 		else {
 			notifyBox("Empty List...");
 			return;
 		}
-	} while (viewListOfClassesCommand(curPos, 0, i, page, numberPages, viewListOfCourseOption));
+	} while (viewScoreboardCommand(curPos, 0, i + 1, list, *c, page, numberPages, viewScoreboardOption));
 }
+
 //Update list of courses
 void viewListOfStudent(Course* c);
 int updateCourseCommand(int& curPos, int minPos, int maxPos, Course* course, function<int(int, Course*)> option) {
@@ -871,9 +1050,11 @@ int updateCourseOption(int curPos, Course* course) {
 	case 5:
 		loading("Importing...");
 		importScoreboard(course);
+		return 1;
 		break;
 	case 6:
 		viewScoreboard(course);
+		return 1;
 		break;
 	case 7:
 		break;
