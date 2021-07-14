@@ -508,7 +508,7 @@ void getListClasses(string year) {
 	initList(listClasses);
 	string path = "./data/" + currentSchoolYear + "/classes/" + year + "/";
 
-	std::string ext(".csv");
+	string ext(".csv");
 	for (auto& p : fs::recursive_directory_iterator(path))
 	{
 		if (p.path().extension() == ext) {
@@ -581,4 +581,67 @@ void getCurrentSemester() {
 		currentSemester.endDate = strToDate(endDate);
 		semesterPath = "data/" + currentSchoolYear + "/semester " + to_string(currentSemester.semester);
 	}
+}
+void getEnrolledCourses(Student* s) {
+	ifstream fin(semesterPath + "/student/" + s->studentID + ".dat");
+	initList(s->enrolledCourses);
+	if (!fin) return;
+	while (!fin.eof()) {
+		addCourse(s->enrolledCourses, convertCourseData(fin));
+	}
+}
+ListStudent getListOfStudentScoreboard(Course* course);
+void calcGPA(Student* student) {
+	ifstream fin("./data/student/" + student->studentID + "-overallGPA.dat");
+	fin >> student->semesterMark.overallGPA;
+	float totalMark = 0;
+	int credits = 0;
+	Course* course = student->enrolledCourses.head;
+	while (course != NULL){ 
+		ListStudent list = getListOfStudentScoreboard(course);
+		Student* temp = list.head;
+		while (temp != NULL) {
+			if (temp->studentID == student->studentID) break;
+			temp = temp->next;
+		}
+		if (temp == NULL) totalMark += 0;
+		else totalMark += (temp->courseMark.totalMark * course->credits);
+		credits += course->credits;
+		course = course->next;
+	}
+	if (totalMark == 0) student->semesterMark.GPA = 0;
+	else student->semesterMark.GPA = totalMark / credits;
+	if (student->semesterMark.overallGPA == -1) student->semesterMark.overallGPA = student->semesterMark.GPA;
+	else {
+		student->semesterMark.overallGPA += student->semesterMark.GPA;
+		student->semesterMark.overallGPA /= 2;
+	}
+}
+void saveOverallGPA(Student* student) {
+	fstream f("./data/student/" + student->studentID + "-overallGPA.dat");
+	f >> student->semesterMark.overallGPA;
+	float totalMark = 0;
+	int credits = 0;
+	Course* course = student->enrolledCourses.head;
+	while (course != NULL) {
+		ListStudent list = getListOfStudentScoreboard(course);
+		Student* temp = list.head;
+		while (temp != NULL) {
+			if (temp->studentID == student->studentID) break;
+			temp = temp->next;
+		}
+		if (temp == NULL) totalMark += 0;
+		else totalMark += (temp->courseMark.totalMark * course->credits);
+		credits += course->credits;
+		course = course->next;
+	}
+	if (totalMark == 0) student->semesterMark.GPA = 0;
+	else student->semesterMark.GPA = totalMark / credits;
+	if (student->semesterMark.overallGPA == -1) student->semesterMark.overallGPA = student->semesterMark.GPA;
+	else {
+		student->semesterMark.overallGPA += student->semesterMark.GPA;
+		student->semesterMark.overallGPA /= 2;
+	}
+	f << student->semesterMark.overallGPA;
+	f.close();
 }

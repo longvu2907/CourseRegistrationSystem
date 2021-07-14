@@ -40,6 +40,25 @@ struct User {
 	User* prev;
 	User* next;
 };
+struct Course {
+	string id;
+	string courseName;
+	string teacherName;
+	int credits;
+	int maxStudents = 50;
+	int numberRegistered = 0;
+	int academicYear;
+	string wDay;
+	string session[2];
+	Course* prev;
+	Course* next;
+};
+struct ListCourses {
+	Course* head;
+	Course* tail;
+	Date startDate, endDate;
+	int size;
+};
 struct ListUser {
 	User* head;
 	User* tail;
@@ -51,8 +70,7 @@ struct CourseMark {
 	float finalMark = 0;
 	float totalMark = 0;
 };
-struct SemesterMark{
-	float finalMarkOfCourses[5];
+struct SemesterMark {
 	float GPA = 0;
 	float overallGPA = 0;
 };
@@ -82,25 +100,6 @@ struct ListStudent {
 struct Semester {
 	int semester;
 	Date startDate, endDate;
-};
-struct Course {
-	string id;
-	string courseName;
-	string teacherName;
-	int credits;
-	int maxStudents = 50;
-	int numberRegistered = 0;
-	int academicYear;
-	string wDay;
-	string session[2];
-	Course* prev;
-	Course* next;
-};
-struct ListCourses {
-	Course* head;
-	Course* tail;
-	Date startDate, endDate;
-	int size;
 };
 struct Class {
 	string className;
@@ -155,6 +154,9 @@ void getListClasses(string year);
 void getCurrentDate();
 void getCurrentSchoolYear();
 void getCurrentSemester();
+void getEnrolledCourses(Student* s);
+void calcGPA(Student* student);
+void saveOverallGPA(Student* student);
 
 extern User* currentUser;
 extern ListUser listUser;
