@@ -752,6 +752,10 @@ int viewListOfClassesInSchoolYearOption(int curPos) {
 	return 1;
 }
 void viewListOfClasses() {
+	if (!dirExists(schoolYearPath)) {
+		notifyBox("Please create school year !");
+		return;
+	}
 	const int width = 40;
 	const int height = 10;
 	const int left = 40;

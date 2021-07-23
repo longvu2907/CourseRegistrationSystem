@@ -565,7 +565,12 @@ void getCurrentSchoolYear() {
 }
 void getCurrentSemester() {
 	ifstream fin("data/" + currentSchoolYear + "/semester.dat");
-	if (!fin) return;
+	if (!fin) {
+		currentSemester.semester = 0;
+		currentSemester.startDate = strToDate("0/0/0");
+		currentSemester.endDate = strToDate("0/0/0");
+		return;
+	}
 	fin >> currentSemester.semester;
 	string startDate, endDate, s;
 	getline(fin, s);

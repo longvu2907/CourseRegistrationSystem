@@ -309,7 +309,7 @@ void importClassData() {
 	int height = 8;
 	int left = 35;
 	int top = 9;
-	string dir = "./data/importFiles/classes";
+	string dir = "./data/importFiles/classes/";
 
 	string temp;
 	gotoXY(55, 5); cout << "HCMUS Portal";
@@ -1367,7 +1367,7 @@ void importCoursesData() {
 	int height = 4;
 	int left = 35;
 	int top = 8;
-	string dir = "./data/importFiles/";
+	string dir = "./data/importFiles/courses/";
 
 	string temp;
 	gotoXY(55, 5); cout << "HCMUS Portal";
@@ -1533,7 +1533,7 @@ void viewCourses() {
 
 	do {
 		i = 0;
-		numberPages = (listCourses.size / 10) + 1;
+		numberPages = ((listCourses.size - 1) / 10) + 1;
 		height = 9;
 		system("cls");
 		gotoXY(55, 5); cout << "HCMUS Portal";
@@ -1585,6 +1585,10 @@ void viewCourses() {
 	} while (viewCoursesCommand(curPos, 0, i, page, numberPages, viewCourseOption));
 }
 void manageCourses() {
+	if (!dirExists(schoolYearPath)) {
+		notifyBox("Please create school year !");
+		return;
+	}
 	const int width = 40;
 	const int height = 11;
 	const int left = 40;
@@ -1651,6 +1655,7 @@ void setting() {
 	hideCursor(true);
 	getCurrentSchoolYear();
 	getCurrentSemester();
+	schoolYearPath = "./data/" + currentSchoolYear;
 	system("cls");
 }
 
