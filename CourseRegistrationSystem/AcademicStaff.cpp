@@ -1164,7 +1164,7 @@ void modifyCourse(Course* course) {
 	gotoXY(64, 13); cin >> course->credits;
 	gotoXY(70, 14); cin >> course->maxStudents;
 	cin.ignore();
-	gotoXY(44, 15); getline(cin, course->wDay);
+	gotoXY(54, 15); getline(cin, course->wDay);
 	toUpper(course->wDay);
 	gotoXY(68, 16); getline(cin, session);
 	toUpper(session);

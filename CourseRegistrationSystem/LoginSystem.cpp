@@ -115,7 +115,6 @@ void loginUI() {
 void loginSystem() {
 	system("cls");
 	getListUsers();
-	getCurrentDate();
 	getCurrentSchoolYear();
 	getCurrentSemester();
 	getListCourses();
